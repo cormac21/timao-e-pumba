@@ -1,0 +1,17 @@
+services:
+  timao-e-pumba:
+    image: timao-e-pumba-image
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    ports:
+      - 8080:8081
+  db:
+    image: mysql
+    restart: always
+    environment:
+      MYSQL_USER: timaoEPumba
+      MYSQL_PASSWORD: my-secret-pw
+      MYSQL_ROOT_PASSWORD: jabbaTheHut
+    ports:
+      - 3360:3360
