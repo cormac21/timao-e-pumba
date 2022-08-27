@@ -6,6 +6,7 @@ import lombok.NonNull;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.validation.constraints.Min;
 import java.math.BigInteger;
 
 @Entity
@@ -20,6 +21,7 @@ public class Operation {
     private OperationType opType;
 
     @NonNull
+    @Min(value = 1L)
     private Integer quantity;
 
     @NonNull
