@@ -5,12 +5,13 @@ import com.cormacx.timaoepumba.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
 public class UserService {
 
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
 
     @Autowired
     public UserService(UserRepository userRepository) {
@@ -18,12 +19,11 @@ public class UserService {
     }
 
     public Optional<User> findUserByEmail(String email) {
-        Optional<User> userOp = userRepository.findByEmail(email);
-        if (userOp.isPresent()) {
-            return userOp;
-        } else {
-            return Optional.empty();
-        }
+        return userRepository.findByEmail(email);
+    }
+
+    public List<User> findAll() {
+        return userRepository.findAll();
     }
 
     public Optional<User> createNewUser(User user) {

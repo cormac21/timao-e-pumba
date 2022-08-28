@@ -12,10 +12,10 @@ import java.math.BigInteger;
 import java.util.List;
 import java.util.Optional;
 
-@RestController("/operations")
+@RestController
 public class OperationController {
 
-    private OperationService operationService;
+    private final OperationService operationService;
 
     @Autowired
     public OperationController(OperationService operationService) {
@@ -23,33 +23,25 @@ public class OperationController {
     }
 
 
-    @GetMapping("/{id}")
+    @GetMapping("/operation/{id}")
     public Operation getSingleOperation(@PathVariable BigInteger id) {
         Optional<Operation> operationOp = operationService.getOperationById(id);
-        if (operationOp.isPresent()){
-            return operationOp.get();
-        } else {
-            return null;
-        }
+        return operationOp.orElse(null);
     }
 
-    @PostMapping
+    @PostMapping("/operation")
     public Operation createNewOperation(@RequestBody Operation op) {
         Optional<Operation> operationOp = operationService.createNewOperation(op);
-        if (operationOp.isPresent()) {
-            return operationOp.get();
-        } else {
-            return null;
-        }
+        return operationOp.orElse(null);
     }
 
-    @GetMapping
+    @GetMapping("/operation")
     public ResponseEntity<List<Operation>> getAllOperations( @RequestParam Integer pageNumber,
                                                              @RequestParam Integer pageSize,
                                                              @RequestParam String sortBy) {
         List<Operation> operations = operationService.getAllOperations(pageNumber, pageSize, sortBy);
 
-        return new ResponseEntity<List<Operation>>(operations, new HttpHeaders(), HttpStatus.OK);
+        return new ResponseEntity<>(operations, new HttpHeaders(), HttpStatus.OK);
     }
 
 }
