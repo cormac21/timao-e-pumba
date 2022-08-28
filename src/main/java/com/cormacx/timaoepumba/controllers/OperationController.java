@@ -36,9 +36,9 @@ public class OperationController {
     }
 
     @GetMapping("/operation")
-    public ResponseEntity<List<Operation>> getAllOperations( @RequestParam Integer pageNumber,
-                                                             @RequestParam Integer pageSize,
-                                                             @RequestParam String sortBy) {
+    public ResponseEntity<List<Operation>> getAllOperations( @RequestParam(defaultValue = "0") Integer pageNumber,
+                                                             @RequestParam(defaultValue = "10") Integer pageSize,
+                                                             @RequestParam(defaultValue = "id") String sortBy) {
         List<Operation> operations = operationService.getAllOperations(pageNumber, pageSize, sortBy);
 
         return new ResponseEntity<>(operations, new HttpHeaders(), HttpStatus.OK);
