@@ -1,5 +1,6 @@
 package com.cormacx.timaoepumba.entities.user;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
@@ -30,7 +31,11 @@ public class User {
     @NonNull
     private String email;
 
-    private String passwordHash;
+    @NonNull
+    private String username;
+
+    @JsonIgnore
+    private String password;
 
     private LocalDate lastLogin;
 

@@ -15,4 +15,5 @@ public interface UserRepository extends CrudRepository<User, UUID> {
 
     List<User> findAll();
 
+    Optional<User> findByUsername();
 }
