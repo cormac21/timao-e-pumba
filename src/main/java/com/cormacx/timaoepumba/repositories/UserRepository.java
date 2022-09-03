@@ -1,7 +1,7 @@
 package com.cormacx.timaoepumba.repositories;
 
-import com.cormacx.timaoepumba.entities.user.User;
-import org.springframework.data.repository.CrudRepository;
+import com.cormacx.timaoepumba.entities.user.UserEntity;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -9,11 +9,10 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Repository
-public interface UserRepository extends CrudRepository<User, UUID> {
+public interface UserRepository extends JpaRepository<UserEntity, UUID> {
 
-    Optional<User> findByEmail(String email);
+    Optional<UserEntity> findByEmail(String email);
 
-    List<User> findAll();
+    List<UserEntity> findAll();
 
-    Optional<User> findByUsername();
 }

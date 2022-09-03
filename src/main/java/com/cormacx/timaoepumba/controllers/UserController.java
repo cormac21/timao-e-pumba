@@ -1,6 +1,6 @@
 package com.cormacx.timaoepumba.controllers;
 
-import com.cormacx.timaoepumba.entities.user.User;
+import com.cormacx.timaoepumba.entities.user.UserEntity;
 import com.cormacx.timaoepumba.entities.user.UserDTO;
 import com.cormacx.timaoepumba.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
-import javax.annotation.security.RolesAllowed;
 import java.util.List;
 import java.util.Optional;
 
@@ -31,7 +30,7 @@ public class UserController {
         if (userService.findUserByEmail(user.getEmail()).isPresent()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
         }
-        Optional<User> userOp = userService.createNewUser(user);
+        Optional<UserEntity> userOp = userService.createNewUser(user);
         if (userOp.isPresent()) {
             return new ResponseEntity<>(HttpStatus.OK);
         } else {
@@ -39,11 +38,10 @@ public class UserController {
         }
     }
 
-    @RolesAllowed("ROLE_ADMIN")
     @GetMapping("/user")
     public ResponseEntity<?> getAllUsers() {
-        List<User> users = userService.findAll();
-        return new ResponseEntity<>(users, HttpStatus.OK);
+        List<UserEntity> userEntities = userService.findAll();
+        return new ResponseEntity<>(userEntities, HttpStatus.OK);
     }
 
 

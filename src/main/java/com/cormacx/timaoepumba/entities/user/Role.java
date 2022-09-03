@@ -1,6 +1,7 @@
 package com.cormacx.timaoepumba.entities.user;
 
 import lombok.Data;
+import org.springframework.security.core.GrantedAuthority;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -13,7 +14,7 @@ import java.util.Collection;
 
 @Entity
 @Data
-public class Role {
+public class Role implements GrantedAuthority {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,7 +23,7 @@ public class Role {
     private String name;
 
     @ManyToMany(mappedBy = "roles")
-    private Collection<User> users;
+    private Collection<UserEntity> userEntities;
 
     @ManyToMany
     @JoinTable(
@@ -33,4 +34,8 @@ public class Role {
                     name = "privilege_id", referencedColumnName = "id"))
     private Collection<Privilege> privileges;
 
+    @Override
+    public String getAuthority() {
+        return "ROLE_" + name;
+    }
 }

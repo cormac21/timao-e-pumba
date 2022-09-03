@@ -2,7 +2,7 @@ package com.cormacx.timaoepumba.service;
 
 import com.cormacx.timaoepumba.entities.user.Privilege;
 import com.cormacx.timaoepumba.entities.user.Role;
-import com.cormacx.timaoepumba.entities.user.User;
+import com.cormacx.timaoepumba.entities.user.UserEntity;
 import com.cormacx.timaoepumba.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
@@ -29,7 +29,7 @@ public class JwtUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        Optional<User> userOp = userRepository.findByEmail(email);
+        Optional<UserEntity> userOp = userRepository.findByEmail(email);
         if (userOp.isEmpty()) {
             throw new UsernameNotFoundException("User not found!");
         }
