@@ -1,6 +1,6 @@
 package com.cormacx.timaoepumba.service;
 
-import com.cormacx.timaoepumba.entities.Operation;
+import com.cormacx.timaoepumba.entities.operation.Operation;
 import com.cormacx.timaoepumba.repositories.OperationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;

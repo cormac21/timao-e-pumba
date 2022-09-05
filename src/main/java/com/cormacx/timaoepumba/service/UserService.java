@@ -5,6 +5,7 @@ import com.cormacx.timaoepumba.entities.user.UserDTO;
 import com.cormacx.timaoepumba.repositories.RoleRepository;
 import com.cormacx.timaoepumba.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -32,10 +33,12 @@ public class UserService {
     }
 
     public Optional<UserEntity> createNewUser(UserDTO user) {
+
+        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
         UserEntity newUserEntity = new UserEntity();
-        newUserEntity.setEmail(newUserEntity.getEmail());
-        newUserEntity.setPassword(newUserEntity.getPassword());
-        newUserEntity.setRoles(List.of(roleRepository.findByName("ROLE_USER").get()));
+        newUserEntity.setEmail(user.getEmail());
+        newUserEntity.setPassword(encoder.encode(user.getPassword()));
+        newUserEntity.setRoles(List.of(roleRepository.findByName("USER").get()));
 
         return Optional.of(userRepository.save(newUserEntity));
     }

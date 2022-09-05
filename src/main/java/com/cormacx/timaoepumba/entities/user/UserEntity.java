@@ -16,12 +16,13 @@ import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.validation.constraints.Email;
+import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
-@Entity
+@Entity(name = "users")
 @Data
 @NoArgsConstructor
 public class UserEntity {
@@ -41,6 +42,7 @@ public class UserEntity {
     private String username;
 
     @JsonIgnore
+    @NonNull
     private String password;
 
     @ManyToMany

@@ -1,4 +1,4 @@
-package com.cormacx.timaoepumba.entities;
+package com.cormacx.timaoepumba.entities.operation;
 
 import lombok.Data;
 import lombok.NonNull;

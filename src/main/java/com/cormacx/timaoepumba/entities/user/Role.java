@@ -1,6 +1,7 @@
 package com.cormacx.timaoepumba.entities.user;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 
 import javax.persistence.Entity;
@@ -14,6 +15,7 @@ import java.util.Collection;
 
 @Entity
 @Data
+@NoArgsConstructor
 public class Role implements GrantedAuthority {
 
     @Id
@@ -37,5 +39,9 @@ public class Role implements GrantedAuthority {
     @Override
     public String getAuthority() {
         return "ROLE_" + name;
+    }
+
+    public Role(String name) {
+        this.name = name;
     }
 }
