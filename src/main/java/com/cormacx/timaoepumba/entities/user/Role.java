@@ -11,7 +11,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
-import java.util.Collection;
+import java.util.Set;
 
 @Entity
 @Data
@@ -25,7 +25,7 @@ public class Role implements GrantedAuthority {
     private String name;
 
     @ManyToMany(mappedBy = "roles")
-    private Collection<UserEntity> userEntities;
+    private Set<UserEntity> userEntities;
 
     @ManyToMany
     @JoinTable(
@@ -34,7 +34,7 @@ public class Role implements GrantedAuthority {
                     name = "role_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(
                     name = "privilege_id", referencedColumnName = "id"))
-    private Collection<Privilege> privileges;
+    private Set<Privilege> privileges;
 
     @Override
     public String getAuthority() {
