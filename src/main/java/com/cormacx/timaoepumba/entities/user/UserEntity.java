@@ -1,9 +1,11 @@
 package com.cormacx.timaoepumba.entities.user;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
+import lombok.ToString;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Type;
 import org.springframework.security.core.GrantedAuthority;
@@ -25,6 +27,7 @@ import java.util.UUID;
 @Entity(name = "users")
 @Data
 @NoArgsConstructor
+@ToString
 public class UserEntity {
 
     @Id
@@ -36,6 +39,7 @@ public class UserEntity {
 
     @Email
     @NonNull
+    @Column(unique = true)
     private String email;
 
     @NonNull
@@ -46,6 +50,7 @@ public class UserEntity {
     private String password;
 
     @ManyToMany
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @JoinTable(
             name = "users_roles",
             joinColumns = @JoinColumn(

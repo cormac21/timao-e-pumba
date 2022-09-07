@@ -30,7 +30,6 @@ public class UserController {
 
     private final AuthenticationManager authenticationManager;
 
-    @Autowired
     public UserController(UserService userService, AuthenticationManager authManager) {
         this.userService = userService;
         this.authenticationManager = authManager;
@@ -66,8 +65,9 @@ public class UserController {
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(userDTO.getEmail(),
                     userDTO.getPassword()));
             final var user = userService.findUserByEmail(userDTO.getEmail());
+            String token = JWT.token(user.get());
             return ResponseEntity.ok()
-                    .header(HttpHeaders.AUTHORIZATION, JWT.token(user.get()))
+                    .header(HttpHeaders.AUTHORIZATION, token)
                     .body(user.get());
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();

@@ -73,7 +73,7 @@ public class MigrationStation implements ApplicationListener<ContextRefreshedEve
     }
 
     @Transactional
-    UserEntity createAdminIfNotFound(Role adminRole) {
+    void createAdminIfNotFound(Role adminRole) {
         var userOp = userRepository.findByEmail("admin@timaoepumba.com.br");
         if (userOp.isEmpty()) {
             UserEntity user = new UserEntity();
@@ -83,7 +83,6 @@ public class MigrationStation implements ApplicationListener<ContextRefreshedEve
             user.setRoles(Set.of(adminRole));
             userRepository.save(user);
         }
-        return userOp.get();
     }
 
 }
