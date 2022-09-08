@@ -1,5 +1,6 @@
 package com.cormacx.timaoepumba.service;
 
+import com.cormacx.timaoepumba.entities.account.Account;
 import com.cormacx.timaoepumba.entities.user.UserEntity;
 import com.cormacx.timaoepumba.entities.user.UserDTO;
 import com.cormacx.timaoepumba.repositories.RoleRepository;
@@ -35,11 +36,21 @@ public class UserService {
     public Optional<UserEntity> createNewUser(UserDTO user) {
 
         BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+        Account newAccount = new Account();
+        newAccount.setBalance(0D);
+
         UserEntity newUserEntity = new UserEntity();
         newUserEntity.setEmail(user.getEmail());
         newUserEntity.setPassword(encoder.encode(user.getPassword()));
         newUserEntity.setRoles(List.of(roleRepository.findByName("USER").get()));
+        newUserEntity.setAccount(newAccount);
 
-        return Optional.of(userRepository.save(newUserEntity));
+        UserEntity savedUser = userRepository.save(newUserEntity);
+        return Optional.of(savedUser);
     }
+
+    public UserEntity saveOrUpdateUser(UserEntity user) {
+        return userRepository.save(user);
+    }
+
 }

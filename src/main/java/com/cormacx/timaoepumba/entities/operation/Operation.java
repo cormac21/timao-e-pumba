@@ -1,16 +1,22 @@
 package com.cormacx.timaoepumba.entities.operation;
 
+import com.cormacx.timaoepumba.entities.account.Account;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.NonNull;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.ManyToMany;
 import javax.validation.constraints.Min;
 import java.math.BigInteger;
+import java.util.Date;
+import java.util.List;
 
 @Entity
 @Data
+@NoArgsConstructor
 public class Operation {
 
     @Id
@@ -36,5 +42,9 @@ public class Operation {
     @NonNull
     private String userUUID;
 
-    public Operation() {}
+    private Date createdOn;
+
+    @ManyToMany(mappedBy = "operations")
+    private List<Account> accounts;
+
 }
