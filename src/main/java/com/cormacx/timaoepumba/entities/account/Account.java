@@ -24,7 +24,7 @@ public class Account {
     private Long id;
 
     @OneToOne
-    private UserEntity account;
+    private UserEntity user;
 
     private Double balance;
 

@@ -1,6 +1,8 @@
 package com.cormacx.timaoepumba.entities.operation;
 
 import com.cormacx.timaoepumba.entities.account.Account;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
@@ -17,6 +19,8 @@ import java.util.List;
 @Entity
 @Data
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Operation {
 
     @Id

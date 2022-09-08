@@ -1,6 +1,7 @@
 package com.cormacx.timaoepumba.controllers;
 
 import com.cormacx.timaoepumba.entities.operation.Operation;
+import com.cormacx.timaoepumba.entities.operation.OperationDTO;
 import com.cormacx.timaoepumba.service.OperationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -30,7 +31,7 @@ public class OperationController {
     }
 
     @PostMapping("/operation")
-    public Operation createNewOperation(@RequestBody Operation op) {
+    public Operation createNewOperation(@RequestBody OperationDTO op) {
         Optional<Operation> operationOp = operationService.createNewOperation(op);
         return operationOp.orElse(null);
     }
