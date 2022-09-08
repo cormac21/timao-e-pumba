@@ -11,7 +11,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.invocation.InvocationOnMock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
 
@@ -20,7 +19,10 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.atLeast;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -42,13 +44,10 @@ public class UserServiceTest {
         role.setName("ROLE_USER");
         when(roleRepository.findByName("USER")).thenReturn(Optional.of(role));
 
-        when(userRepository.save(any(UserEntity.class))).then(new Answer<UserEntity>() {
-            @Override
-            public UserEntity answer(InvocationOnMock invocation) throws Throwable {
-                UserEntity user = (UserEntity) invocation.getArgument(0);
-                user.setId(UUID.randomUUID());
-                return user;
-            }
+        when(userRepository.save(any(UserEntity.class))).then((Answer<UserEntity>) invocation -> {
+            UserEntity user = invocation.getArgument(0);
+            user.setId(UUID.randomUUID());
+            return user;
         });
     }
 
@@ -60,11 +59,28 @@ public class UserServiceTest {
 
         Optional<UserEntity> savedUser = userService.createNewUser(userDTO);
 
+        assertTrue(savedUser.isPresent());
         assertNotNull(savedUser.get());
         assertEquals("garboglargh@test.com", savedUser.get().getEmail());
         assertNotNull(savedUser.get().getId());
         assertEquals(0D, savedUser.get().getAccount().getBalance());
         //assertEquals(new ArrayList<>(), savedUser.get().getRoles());
+    }
+
+    @Test
+    public void canUpdateUserWithNewInformation() {
+        UserDTO userDTO = new UserDTO();
+        userDTO.setEmail("garboglargh@test.com");
+        userDTO.setPassword("gargoblorg");
+        Optional<UserEntity> newUser = userService.createNewUser(userDTO);
+        newUser.get().setUsername("Um nome muito bacana pra esse usuario");
+
+        UserEntity updatedUser = userService.saveOrUpdateUser(newUser.get());
+
+        verify(userRepository, atLeast(2)).save(newUser.get());
+        assertEquals("Um nome muito bacana pra esse usuario", updatedUser.getUsername());
+        assertEquals("garboglargh@test.com", updatedUser.getEmail());
+        assertEquals(newUser.get().getId(), updatedUser.getId());
     }
 
 }
