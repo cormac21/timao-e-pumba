@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
+@RequestMapping("api/v1/operations")
 public class OperationController {
 
     private final OperationService operationService;
@@ -24,19 +25,19 @@ public class OperationController {
     }
 
 
-    @GetMapping("/operation/{id}")
+    @GetMapping("/{id}")
     public Operation getSingleOperation(@PathVariable BigInteger id) {
         Optional<Operation> operationOp = operationService.getOperationById(id);
         return operationOp.orElse(null);
     }
 
-    @PostMapping("/operation")
+    @PostMapping
     public Operation createNewOperation(@RequestBody OperationDTO op) {
         Optional<Operation> operationOp = operationService.createNewOperation(op);
         return operationOp.orElse(null);
     }
 
-    @GetMapping("/operation")
+    @GetMapping
     public ResponseEntity<List<Operation>> getAllOperations( @RequestParam(defaultValue = "0") Integer pageNumber,
                                                              @RequestParam(defaultValue = "10") Integer pageSize,
                                                              @RequestParam(defaultValue = "id") String sortBy) {
