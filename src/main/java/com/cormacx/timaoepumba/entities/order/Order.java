@@ -1,4 +1,4 @@
-package com.cormacx.timaoepumba.entities.operation;
+package com.cormacx.timaoepumba.entities.order;
 
 import com.cormacx.timaoepumba.entities.account.Account;
 import lombok.AllArgsConstructor;
@@ -9,9 +9,14 @@ import lombok.NonNull;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.ManyToMany;
+import javax.persistence.ManyToOne;
 import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Null;
 import java.math.BigInteger;
 import java.util.Date;
 import java.util.List;
@@ -21,34 +26,35 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Operation {
+public class Order {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private BigInteger id;
 
-    @NonNull
-    private OperationType opType;
+    @NotNull
+    private OrderType opType;
 
-    @NonNull
+    @NotNull
     @Min(value = 1L)
     private Integer quantity;
 
-    @NonNull
+    @NotNull
     private String ticker;
 
-    @NonNull
+    @NotNull
     private Double unitPrice;
 
-    @NonNull
+    @NotNull
     private Double totalPrice;
 
-    @NonNull
+    @NotNull
     private String userUUID;
 
     private Date createdOn;
 
-    @ManyToMany(mappedBy = "operations")
-    private List<Account> accounts;
+    @ManyToOne
+    @JoinColumn(nullable = false)
+    private Account account;
 
 }

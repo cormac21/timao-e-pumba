@@ -1,12 +1,12 @@
 package com.cormacx.timaoepumba.repositories;
 
-import com.cormacx.timaoepumba.entities.operation.Operation;
+import com.cormacx.timaoepumba.entities.order.Order;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.stereotype.Repository;
 
 import java.math.BigInteger;
 
 @Repository
-public interface OperationRepository extends PagingAndSortingRepository<Operation, BigInteger> {
+public interface OrderRepository extends PagingAndSortingRepository<Order, BigInteger> {
 
 }

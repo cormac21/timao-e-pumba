@@ -1,10 +1,9 @@
 package com.cormacx.timaoepumba.entities.account;
 
-import com.cormacx.timaoepumba.entities.operation.Operation;
+import com.cormacx.timaoepumba.entities.order.Order;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
-
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -14,6 +13,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
+import javax.persistence.OneToMany;
 import java.util.List;
 
 @Entity
@@ -33,13 +33,21 @@ public class Account {
 
     private boolean active;
 
-    @ManyToMany
-    @JoinTable(
-            name = "accounts_operations",
-            joinColumns = @JoinColumn(
-                    name = "account_id", referencedColumnName = "id"),
-            inverseJoinColumns = @JoinColumn(
-                    name = "operation_id", referencedColumnName = "id"))
-    private List<Operation> operations;
+    @OneToMany(mappedBy = "account")
+    private List<Order> orders;
+
+    @OneToMany(mappedBy = "account")
+    private List<AccountOperation> operations;
+
+    @OneToMany(mappedBy = "account")
+    private List<HeldStock> stocks;
+
+    public void addBalance(Double value) {
+        balance = balance + value;
+    }
+
+    public void subtractBalance(Double value) {
+        balance = balance - value;
+    }
 
 }

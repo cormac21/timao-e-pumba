@@ -2,7 +2,7 @@ package com.cormacx.timaoepumba.service;
 
 
 import com.cormacx.timaoepumba.repositories.AccountRepository;
-import com.cormacx.timaoepumba.repositories.OperationRepository;
+import com.cormacx.timaoepumba.repositories.OrderRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -13,27 +13,27 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(MockitoExtension.class)
-public class OperationServiceTest {
+public class OrderServiceTest {
 
     @InjectMocks
-    private OperationService operationService;
+    private OrderService orderService;
 
     @Mock
-    private OperationRepository operationRepository;
+    private OrderRepository orderRepository;
 
     @Mock
     private AccountRepository accountRepository;
 
     @Test
     public void isThereEnoughBalanceForOperationTest(){
-        boolean result = operationService.isThereEnoughBalanceOnAccount(1500.00D, 100, 20.5D);
+        boolean result = orderService.isThereEnoughBalanceOnAccount(1500.00D, 100, 20.5D);
 
         assertFalse(result);
     }
 
     @Test
     public void theresNotEnoughBalanceForNewOperationTest(){
-        boolean result = operationService.isThereEnoughBalanceOnAccount(3500.99D, 100, 20.5D);
+        boolean result = orderService.isThereEnoughBalanceOnAccount(3500.99D, 100, 20.5D);
 
         assertTrue(result);
     }

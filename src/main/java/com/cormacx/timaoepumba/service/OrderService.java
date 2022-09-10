@@ -1,9 +1,9 @@
 package com.cormacx.timaoepumba.service;
 
 import com.cormacx.timaoepumba.entities.account.Account;
-import com.cormacx.timaoepumba.entities.operation.Operation;
-import com.cormacx.timaoepumba.entities.operation.OperationDTO;
-import com.cormacx.timaoepumba.repositories.OperationRepository;
+import com.cormacx.timaoepumba.entities.order.Order;
+import com.cormacx.timaoepumba.entities.order.OrderDTO;
+import com.cormacx.timaoepumba.repositories.OrderRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -18,35 +18,35 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class OperationService {
+public class OrderService {
 
-    private OperationRepository operationRepository;
+    private OrderRepository orderRepository;
 
     private AccountService accountService;
 
     @Autowired
-    public OperationService(OperationRepository operationRepository, AccountService accountService) {
-        this.operationRepository = operationRepository;
+    public OrderService(OrderRepository orderRepository, AccountService accountService) {
+        this.orderRepository = orderRepository;
         this.accountService = accountService;
     }
 
 
-    public Optional<Operation> getOperationById(BigInteger id) {
-        return operationRepository.findById(id);
+    public Optional<Order> getOrderById(BigInteger id) {
+        return orderRepository.findById(id);
 
     }
 
-    public Optional<Operation> createNewOperation(OperationDTO op) {
+    public Optional<Order> createNewOrder(OrderDTO op) {
         op.setCreatedOn(new Date());
-        if (isValidOperation(op)){
-            Operation toBeCreated = OperationDTO.toEntity(op);
+        if (isValidOrder(op)){
+            Order toBeCreated = OrderDTO.toEntity(op);
 
             //return Optional.of(created);
         }
         return Optional.empty();
     }
 
-    public boolean isValidOperation(OperationDTO op) {
+    public boolean isValidOrder(OrderDTO op) {
         Optional<Account> accountOp = accountService.findAccountByUser(op.getUserUUID());
         if(accountOp.isEmpty()){
             return false;
@@ -67,14 +67,14 @@ public class OperationService {
         }
     }
 
-    public List<Operation> getAllOperations(Integer pageNumber, Integer pageSize, String sortBy) {
+    public List<Order> getAllOrders(Integer pageNumber, Integer pageSize, String sortBy) {
         Pageable paging = PageRequest.of(pageNumber, pageSize, Sort.by(sortBy));
-        Page<Operation> pageOfOperations = operationRepository.findAll(paging);
+        Page<Order> pageOfOrders = orderRepository.findAll(paging);
 
-        if( pageOfOperations.hasContent()){
-            return pageOfOperations.stream().toList();
+        if( pageOfOrders.hasContent()){
+            return pageOfOrders.stream().toList();
         } else {
-            return new ArrayList<Operation>();
+            return new ArrayList<Order>();
         }
     }
 }
