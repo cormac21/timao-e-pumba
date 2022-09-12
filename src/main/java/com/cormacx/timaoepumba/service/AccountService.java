@@ -8,6 +8,7 @@ import com.cormacx.timaoepumba.repositories.AccountRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -39,6 +40,9 @@ public class AccountService {
         account.setUserUUID(userUUID);
         account.setBalance(0D);
         account.setActive(true);
+        account.setStocks(new ArrayList<>());
+        account.setOperations(new ArrayList<>());
+        account.setOrders(new ArrayList<>());
         return accountRepository.save(account);
     }
 
@@ -57,6 +61,8 @@ public class AccountService {
         operation.setCreatedOn(new Date());
         operationRepository.save(operation);
         account.addBalance(value);
+        account.addOperation(operation);
+        accountRepository.save(account);
     }
 
     public void subtractFundsFromAccount(Account account, Double value) {
@@ -66,7 +72,8 @@ public class AccountService {
         operation.setCreatedOn(new Date());
         operationRepository.save(operation);
         account.subtractBalance(value);
+        account.addOperation(operation);
+        accountRepository.save(account);
     }
-
 
 }

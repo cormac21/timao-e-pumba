@@ -63,7 +63,6 @@ public class UserServiceTest {
         assertNotNull(savedUser.get());
         assertEquals("garboglargh@test.com", savedUser.get().getEmail());
         assertNotNull(savedUser.get().getId());
-        assertEquals(0D, savedUser.get().getAccount().getBalance());
         //assertEquals(new ArrayList<>(), savedUser.get().getRoles());
     }
 
