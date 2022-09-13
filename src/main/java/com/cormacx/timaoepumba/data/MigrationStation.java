@@ -5,7 +5,7 @@ import com.cormacx.timaoepumba.entities.user.Role;
 import com.cormacx.timaoepumba.entities.user.UserEntity;
 import com.cormacx.timaoepumba.repositories.PrivilegeRepository;
 import com.cormacx.timaoepumba.repositories.RoleRepository;
-import com.cormacx.timaoepumba.repositories.UserRepository;
+import com.cormacx.timaoepumba.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
@@ -21,17 +21,16 @@ public class MigrationStation implements ApplicationListener<ContextRefreshedEve
 
     private boolean alreadySetup = false;
 
-    private final UserRepository userRepository;
+    private final UserService userService;
     private final RoleRepository roleRepository;
     private final PrivilegeRepository privilegeRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public MigrationStation(UserRepository userRepository,
-                            RoleRepository roleRepository,
+    public MigrationStation(UserService userService, RoleRepository roleRepository,
                             PrivilegeRepository privilegeRepository,
                             PasswordEncoder passwordEncoder) {
-        this.userRepository = userRepository;
+        this.userService = userService;
         this.roleRepository = roleRepository;
         this.privilegeRepository = privilegeRepository;
         this.passwordEncoder = passwordEncoder;
@@ -48,6 +47,7 @@ public class MigrationStation implements ApplicationListener<ContextRefreshedEve
         final var admin = createRoleIfNotFound("ADMIN", Set.of(manage, write, read));
         createRoleIfNotFound("USER", Set.of(write, read));
         createAdminIfNotFound(admin);
+        createGenericUserIfNotFound("user@test.com");
         alreadySetup = true;
     }
 
@@ -74,14 +74,22 @@ public class MigrationStation implements ApplicationListener<ContextRefreshedEve
 
     @Transactional
     void createAdminIfNotFound(Role adminRole) {
-        var userOp = userRepository.findByEmail("admin@timaoepumba.com.br");
+        var userOp = userService.findUserByEmail("admin@timaoepumba.com.br");
         if (userOp.isEmpty()) {
             UserEntity user = new UserEntity();
             user.setUsername("TimaoEPumba Administrator");
             user.setEmail("admin@timaoepumba.com.br");
             user.setPassword(passwordEncoder.encode("admin1234"));
             user.setRoles(Set.of(adminRole));
-            userRepository.save(user);
+            userService.saveOrUpdateUser(user);
+        }
+    }
+
+    private void createGenericUserIfNotFound(String s) {
+        var userOp = userService.findUserByEmail(s);
+        if (userOp.isEmpty()) {
+
+            //userService.saveOrUpdateUser(user);
         }
     }
 

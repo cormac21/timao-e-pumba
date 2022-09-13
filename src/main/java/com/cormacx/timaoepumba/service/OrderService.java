@@ -20,9 +20,9 @@ import java.util.Optional;
 @Service
 public class OrderService {
 
-    private OrderRepository orderRepository;
+    private final OrderRepository orderRepository;
 
-    private AccountService accountService;
+    private final AccountService accountService;
 
     @Autowired
     public OrderService(OrderRepository orderRepository, AccountService accountService) {
@@ -39,11 +39,23 @@ public class OrderService {
     public Optional<Order> createNewOrder(OrderDTO op) {
         op.setCreatedOn(new Date());
         if (isValidOrder(op)){
-            Order toBeCreated = OrderDTO.toEntity(op);
+            Optional<Account> accountOp = accountService.findAccountByUser(op.getUserUUID());
+            if(accountOp.isPresent()){
+                Order toBeCreated = OrderDTO.toEntity(op, accountOp.get());
+                Order saved = orderRepository.save(toBeCreated);
+                processAccountOperationAndHeldStocks(accountOp.get(), saved);
 
-            //return Optional.of(created);
+                return Optional.of(saved);
+            }
         }
         return Optional.empty();
+    }
+
+    private void processAccountOperationAndHeldStocks(Account account, Order savedOrder) {
+        accountService.addOrderToAccount(account, savedOrder);
+        accountService.addAccountOperationToAccount(savedOrder);
+        accountService.subtractFundsFromAccount(account, savedOrder.getTotalPrice());
+
     }
 
     public boolean isValidOrder(OrderDTO op) {
@@ -53,18 +65,13 @@ public class OrderService {
         }
         if(!isThereEnoughBalanceOnAccount(accountOp.get().getBalance(), op.getQuantity(), op.getUnitPrice())) {
             return false;
-
         }
-        return true;
+        return op.getOpType().equalsIgnoreCase("c") && op.getOpType().equalsIgnoreCase("v");
     }
 
     public boolean isThereEnoughBalanceOnAccount(Double balance, Integer quantity, Double unitPrice) {
         Double totalPrice = quantity.doubleValue() * unitPrice;
-        if( balance.compareTo(totalPrice) < 0) {
-            return false;
-        } else {
-            return true;
-        }
+        return balance.compareTo(totalPrice) >= 0;
     }
 
     public List<Order> getAllOrders(Integer pageNumber, Integer pageSize, String sortBy) {
@@ -74,7 +81,7 @@ public class OrderService {
         if( pageOfOrders.hasContent()){
             return pageOfOrders.stream().toList();
         } else {
-            return new ArrayList<Order>();
+            return new ArrayList<>();
         }
     }
 }

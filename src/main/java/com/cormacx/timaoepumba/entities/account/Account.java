@@ -51,4 +51,7 @@ public class Account {
         balance = balance - value;
     }
 
+    public void addOrder(Order saved) {
+        orders.add(saved);
+    }
 }

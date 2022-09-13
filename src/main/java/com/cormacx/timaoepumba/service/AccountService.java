@@ -3,6 +3,8 @@ package com.cormacx.timaoepumba.service;
 import com.cormacx.timaoepumba.entities.account.Account;
 import com.cormacx.timaoepumba.entities.account.AccountOperation;
 import com.cormacx.timaoepumba.entities.account.OperationType;
+import com.cormacx.timaoepumba.entities.order.Order;
+import com.cormacx.timaoepumba.entities.order.OrderType;
 import com.cormacx.timaoepumba.repositories.AccountOperationRepository;
 import com.cormacx.timaoepumba.repositories.AccountRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,7 +48,7 @@ public class AccountService {
         return accountRepository.save(account);
     }
 
-    public Account saveOrUpdateAccount(Account acc){
+    public Account saveOrUpdateAccount(Account acc) {
         return accountRepository.save(acc);
     }
 
@@ -76,4 +78,25 @@ public class AccountService {
         accountRepository.save(account);
     }
 
+    public void addOrderToAccount(Account account, Order saved) {
+        account.addOrder(saved);
+    }
+
+    public void addAccountOperationToAccount(Order saved) {
+        AccountOperation accountOperation = createAccountOperationBasedOnOrder(saved);
+
+    }
+
+    private AccountOperation createAccountOperationBasedOnOrder(Order saved) {
+        AccountOperation accOp = new AccountOperation();
+        accOp.setAmount(saved.getTotalPrice());
+        accOp.setCreatedOn(saved.getCreatedOn());
+        if( saved.getOpType() == OrderType.BUY ) {
+            accOp.setOperationType(OperationType.DEBIT);
+        } else {
+            accOp.setOperationType(OperationType.CREDIT);
+        }
+        accOp.setAccount(saved.getAccount());
+        return operationRepository.save(accOp);
+    }
 }
