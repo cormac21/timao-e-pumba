@@ -2,10 +2,13 @@ package com.cormacx.timaoepumba.data;
 
 import com.cormacx.timaoepumba.entities.user.Privilege;
 import com.cormacx.timaoepumba.entities.user.Role;
+import com.cormacx.timaoepumba.entities.user.UserDTO;
 import com.cormacx.timaoepumba.entities.user.UserEntity;
 import com.cormacx.timaoepumba.repositories.PrivilegeRepository;
 import com.cormacx.timaoepumba.repositories.RoleRepository;
 import com.cormacx.timaoepumba.service.UserService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
@@ -18,6 +21,8 @@ import java.util.Set;
 
 @Component
 public class MigrationStation implements ApplicationListener<ContextRefreshedEvent> {
+
+    private static Logger log = LoggerFactory.getLogger(MigrationStation.class);
 
     private boolean alreadySetup = false;
 
@@ -47,7 +52,7 @@ public class MigrationStation implements ApplicationListener<ContextRefreshedEve
         final var admin = createRoleIfNotFound("ADMIN", Set.of(manage, write, read));
         createRoleIfNotFound("USER", Set.of(write, read));
         createAdminIfNotFound(admin);
-        createGenericUserIfNotFound("user@test.com");
+        createGenericUserIfNotFound();
         alreadySetup = true;
     }
 
@@ -85,11 +90,17 @@ public class MigrationStation implements ApplicationListener<ContextRefreshedEve
         }
     }
 
-    private void createGenericUserIfNotFound(String s) {
-        var userOp = userService.findUserByEmail(s);
+    private void createGenericUserIfNotFound() {
+        String bogusEmail = "test@timaoepumba.com";
+        Optional<UserEntity> userOp = userService.findUserByEmail(bogusEmail);
         if (userOp.isEmpty()) {
-
-            //userService.saveOrUpdateUser(user);
+            UserDTO newUser = new UserDTO();
+            newUser.setEmail(bogusEmail);
+            newUser.setPassword("timaoEPumba");
+            Optional<UserEntity> saved = userService.createNewUser(newUser);
+            if(saved.isPresent()){
+                log.info("User saved: ".concat(saved.get().getId().toString()));
+            }
         }
     }
 
