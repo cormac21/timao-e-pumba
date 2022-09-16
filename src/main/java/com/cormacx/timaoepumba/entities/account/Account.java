@@ -11,9 +11,12 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
-import java.util.List;
+import javax.persistence.Table;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 @Entity
+@Table(name = "accounts")
 @Data
 @NoArgsConstructor
 public class Account {
@@ -31,13 +34,13 @@ public class Account {
     private boolean active;
 
     @OneToMany(mappedBy = "account")
-    private List<Order> orders;
+    private Set<Order> orders = new LinkedHashSet<>();
 
     @OneToMany(mappedBy = "account")
-    private List<AccountOperation> operations;
+    private Set<AccountOperation> operations = new LinkedHashSet<>();
 
     @OneToMany(mappedBy = "account")
-    private List<HeldStock> stocks;
+    private Set<HeldStock> stocks = new LinkedHashSet<>();
 
     public void addOperation(AccountOperation accountOperation) {
         operations.add(accountOperation);

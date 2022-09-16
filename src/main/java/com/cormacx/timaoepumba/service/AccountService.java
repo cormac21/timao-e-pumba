@@ -5,12 +5,11 @@ import com.cormacx.timaoepumba.entities.account.AccountOperation;
 import com.cormacx.timaoepumba.entities.account.OperationType;
 import com.cormacx.timaoepumba.entities.order.Order;
 import com.cormacx.timaoepumba.entities.order.OrderType;
-import com.cormacx.timaoepumba.repositories.AccountOperationRepository;
 import com.cormacx.timaoepumba.repositories.AccountRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
+import javax.transaction.Transactional;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -20,12 +19,9 @@ public class AccountService {
 
     private final AccountRepository accountRepository;
 
-    private final AccountOperationRepository operationRepository;
-
     @Autowired
-    public AccountService(AccountRepository accountRepository, AccountOperationRepository operationRepository) {
+    public AccountService(AccountRepository accountRepository) {
         this.accountRepository = accountRepository;
-        this.operationRepository = operationRepository;
     }
 
     public Optional<Account> findAccountById(Long id) {
@@ -42,9 +38,6 @@ public class AccountService {
         account.setUserUUID(userUUID);
         account.setBalance(0D);
         account.setActive(true);
-        account.setStocks(new ArrayList<>());
-        account.setOperations(new ArrayList<>());
-        account.setOrders(new ArrayList<>());
         return accountRepository.save(account);
     }
 
@@ -56,14 +49,15 @@ public class AccountService {
         return accountRepository.findAll();
     }
 
+    @Transactional
     public void addFundsToAccount(Account account, Double value) {
         AccountOperation operation = new AccountOperation();
         operation.setOperationType(OperationType.CREDIT);
         operation.setAmount(value);
         operation.setCreatedOn(new Date());
-        operationRepository.save(operation);
-        account.addBalance(value);
+        operation.setAccount(account);
         account.addOperation(operation);
+        account.addBalance(value);
         accountRepository.save(account);
     }
 
@@ -72,31 +66,32 @@ public class AccountService {
         operation.setOperationType(OperationType.DEBIT);
         operation.setAmount(value);
         operation.setCreatedOn(new Date());
-        operationRepository.save(operation);
+        operation.setAccount(account);
         account.subtractBalance(value);
         account.addOperation(operation);
         accountRepository.save(account);
     }
 
-    public void addOrderToAccount(Account account, Order saved) {
-        account.addOrder(saved);
+    public void addOrderToAccount(Order saved) {
+        saved.getAccount().addOrder(saved);
     }
 
     public void addAccountOperationToAccount(Order saved) {
-        AccountOperation accountOperation = createAccountOperationBasedOnOrder(saved);
+        createAccountOperationBasedOnOrder(saved);
 
     }
 
-    private AccountOperation createAccountOperationBasedOnOrder(Order saved) {
-        AccountOperation accOp = new AccountOperation();
-        accOp.setAmount(saved.getTotalPrice());
-        accOp.setCreatedOn(saved.getCreatedOn());
+    private void createAccountOperationBasedOnOrder(Order saved) {
+        AccountOperation accountOperation = new AccountOperation();
+        accountOperation.setAmount(saved.getTotalPrice());
+        accountOperation.setCreatedOn(saved.getCreatedOn());
         if( saved.getOpType() == OrderType.BUY ) {
-            accOp.setOperationType(OperationType.DEBIT);
+            accountOperation.setOperationType(OperationType.DEBIT);
         } else {
-            accOp.setOperationType(OperationType.CREDIT);
+            accountOperation.setOperationType(OperationType.CREDIT);
         }
-        accOp.setAccount(saved.getAccount());
-        return operationRepository.save(accOp);
+        accountOperation.setAccount(saved.getAccount());
+        saved.getAccount().addOperation(accountOperation);
+        accountRepository.save(saved.getAccount());
     }
 }

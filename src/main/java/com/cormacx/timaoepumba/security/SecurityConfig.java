@@ -62,6 +62,7 @@ public class SecurityConfig {
                 .antMatchers(HttpMethod.GET).permitAll()
                 .antMatchers(HttpMethod.POST, "/api/v1/users").permitAll()
                 .antMatchers(HttpMethod.POST, "/api/v1/users/login").permitAll()
+                .antMatchers(HttpMethod.POST, "/api/v1/orders").permitAll()
                 .anyRequest().authenticated().and()
                 .addFilterBefore(
                         jwtTokenFilter,

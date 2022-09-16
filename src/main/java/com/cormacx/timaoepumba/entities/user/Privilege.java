@@ -5,14 +5,15 @@ import lombok.NoArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
+import javax.persistence.Table;
 import java.util.Collection;
 
 @Entity
+@Table(name = "privileges")
 @Data
 @NoArgsConstructor
 public class Privilege implements GrantedAuthority {

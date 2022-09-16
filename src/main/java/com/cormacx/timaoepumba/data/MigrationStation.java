@@ -1,11 +1,13 @@
 package com.cormacx.timaoepumba.data;
 
+import com.cormacx.timaoepumba.entities.account.Account;
 import com.cormacx.timaoepumba.entities.user.Privilege;
 import com.cormacx.timaoepumba.entities.user.Role;
 import com.cormacx.timaoepumba.entities.user.UserDTO;
 import com.cormacx.timaoepumba.entities.user.UserEntity;
 import com.cormacx.timaoepumba.repositories.PrivilegeRepository;
 import com.cormacx.timaoepumba.repositories.RoleRepository;
+import com.cormacx.timaoepumba.service.AccountService;
 import com.cormacx.timaoepumba.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,14 +33,18 @@ public class MigrationStation implements ApplicationListener<ContextRefreshedEve
     private final PrivilegeRepository privilegeRepository;
     private final PasswordEncoder passwordEncoder;
 
+    private final AccountService accountService;
+
     @Autowired
     public MigrationStation(UserService userService, RoleRepository roleRepository,
                             PrivilegeRepository privilegeRepository,
-                            PasswordEncoder passwordEncoder) {
+                            PasswordEncoder passwordEncoder,
+                            AccountService accountService) {
         this.userService = userService;
         this.roleRepository = roleRepository;
         this.privilegeRepository = privilegeRepository;
         this.passwordEncoder = passwordEncoder;
+        this.accountService = accountService;
     }
 
     @Override
@@ -100,6 +106,10 @@ public class MigrationStation implements ApplicationListener<ContextRefreshedEve
             Optional<UserEntity> saved = userService.createNewUser(newUser);
             if(saved.isPresent()){
                 log.info("User saved: ".concat(saved.get().getId().toString()));
+            }
+            Optional<Account> acc = accountService.findAccountByUser(saved.get().getId().toString());
+            if(acc.isPresent()) {
+                accountService.addFundsToAccount(acc.get(), 5000D);
             }
         }
     }

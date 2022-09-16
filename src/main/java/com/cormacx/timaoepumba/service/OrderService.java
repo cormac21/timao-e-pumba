@@ -4,6 +4,8 @@ import com.cormacx.timaoepumba.entities.account.Account;
 import com.cormacx.timaoepumba.entities.order.Order;
 import com.cormacx.timaoepumba.entities.order.OrderDTO;
 import com.cormacx.timaoepumba.repositories.OrderRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -19,6 +21,8 @@ import java.util.Optional;
 
 @Service
 public class OrderService {
+
+    private static Logger log = LoggerFactory.getLogger(OrderService.class);
 
     private final OrderRepository orderRepository;
 
@@ -41,9 +45,10 @@ public class OrderService {
         if (isValidOrder(op)){
             Optional<Account> accountOp = accountService.findAccountByUser(op.getUserUUID());
             if(accountOp.isPresent()){
-                Order toBeCreated = OrderDTO.toEntity(op, accountOp.get());
-                Order saved = orderRepository.save(toBeCreated);
-                processAccountOperationAndHeldStocks(accountOp.get(), saved);
+                Order saved = orderRepository.save(OrderDTO.toEntity(op, accountOp.get()));
+                Optional<Account> accAfterOrderSaved = accountService.findAccountByUser(op.getUserUUID());
+                log.info("Account after Order Saved: ".concat(accAfterOrderSaved.get().toString()));
+                processAccountOperationAndHeldStocks(saved);
 
                 return Optional.of(saved);
             }
@@ -51,10 +56,10 @@ public class OrderService {
         return Optional.empty();
     }
 
-    private void processAccountOperationAndHeldStocks(Account account, Order savedOrder) {
-        accountService.addOrderToAccount(account, savedOrder);
-        accountService.addAccountOperationToAccount(savedOrder);
-        accountService.subtractFundsFromAccount(account, savedOrder.getTotalPrice());
+    private void processAccountOperationAndHeldStocks(Order savedOrder) {
+        //accountService.addOrderToAccount(savedOrder);
+        //accountService.addAccountOperationToAccount(savedOrder);
+        //accountService.subtractFundsFromAccount(savedOrder.getTotalPrice());
 
     }
 
@@ -66,7 +71,7 @@ public class OrderService {
         if(!isThereEnoughBalanceOnAccount(accountOp.get().getBalance(), op.getQuantity(), op.getUnitPrice())) {
             return false;
         }
-        return op.getOpType().equalsIgnoreCase("c") && op.getOpType().equalsIgnoreCase("v");
+        return op.getOpType().equalsIgnoreCase("c") || op.getOpType().equalsIgnoreCase("v");
     }
 
     public boolean isThereEnoughBalanceOnAccount(Double balance, Integer quantity, Double unitPrice) {

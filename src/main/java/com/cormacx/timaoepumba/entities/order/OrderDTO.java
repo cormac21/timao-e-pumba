@@ -32,6 +32,7 @@ public class OrderDTO {
         order.setUnitPrice(dto.getUnitPrice());
         order.setCreatedOn(dto.getCreatedOn());
         order.setAccount(account);
+        order.setTotalPrice(dto.getQuantity() * dto.getUnitPrice());
         return order;
     }
 

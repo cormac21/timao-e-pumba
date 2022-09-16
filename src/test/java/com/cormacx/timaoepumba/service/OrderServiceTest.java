@@ -55,7 +55,6 @@ public class OrderServiceTest {
         incomingOrder.setOpType("c");
         incomingOrder.setUserUUID("some-fake-user-uuid");
         incomingOrder.setUnitPrice(4.66D);
-        incomingOrder.setCreatedOn(createdOn);
         Order order = new Order();
         order.setQuantity(200);
         order.setTicker("MGLU3");
