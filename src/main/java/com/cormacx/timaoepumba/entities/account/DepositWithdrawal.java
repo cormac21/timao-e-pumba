@@ -13,9 +13,9 @@ import java.math.BigInteger;
 import java.util.Date;
 
 @Entity
-@Table(name = "account_operations")
+@Table(name = "deposit_withdrawal")
 @Data
-public class AccountOperation {
+public class DepositWithdrawal {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)

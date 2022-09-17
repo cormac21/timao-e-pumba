@@ -1,10 +1,11 @@
 package com.cormacx.timaoepumba.service;
 
 import com.cormacx.timaoepumba.entities.account.Account;
-import com.cormacx.timaoepumba.entities.account.AccountOperation;
+import com.cormacx.timaoepumba.entities.account.DepositWithdrawal;
 import com.cormacx.timaoepumba.entities.account.OperationType;
 import com.cormacx.timaoepumba.entities.order.Order;
 import com.cormacx.timaoepumba.entities.order.OrderType;
+import com.cormacx.timaoepumba.repositories.DepositWithdrawalRepository;
 import com.cormacx.timaoepumba.repositories.AccountRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -19,9 +20,12 @@ public class AccountService {
 
     private final AccountRepository accountRepository;
 
+    private DepositWithdrawalRepository depositWithdrawalRepository;
+
     @Autowired
-    public AccountService(AccountRepository accountRepository) {
+    public AccountService(AccountRepository accountRepository, DepositWithdrawalRepository depositWithdrawalRepository) {
         this.accountRepository = accountRepository;
+        this.depositWithdrawalRepository = depositWithdrawalRepository;
     }
 
     public Optional<Account> findAccountById(Long id) {
@@ -51,30 +55,37 @@ public class AccountService {
 
     @Transactional
     public void addFundsToAccount(Account account, Double value) {
-        AccountOperation operation = new AccountOperation();
-        operation.setOperationType(OperationType.CREDIT);
-        operation.setAmount(value);
-        operation.setCreatedOn(new Date());
-        operation.setAccount(account);
-        account.addOperation(operation);
+        createCreditForAccount(account, value);
         account.addBalance(value);
         accountRepository.save(account);
     }
 
+    private void createCreditForAccount(Account account, Double value) {
+        DepositWithdrawal deposit = new DepositWithdrawal();
+        deposit.setOperationType(OperationType.CREDIT);
+        deposit.setAmount(value);
+        deposit.setAccount(account);
+        deposit.setCreatedOn(new Date());
+        depositWithdrawalRepository.save(deposit);
+    }
+
+    @Transactional
     public void subtractFundsFromAccount(Account account, Double value) {
-        AccountOperation operation = new AccountOperation();
-        operation.setOperationType(OperationType.DEBIT);
-        operation.setAmount(value);
-        operation.setCreatedOn(new Date());
-        operation.setAccount(account);
+        createDebitForAccount(account, value);
         account.subtractBalance(value);
-        account.addOperation(operation);
         accountRepository.save(account);
     }
 
-    public void addOrderToAccount(Order saved) {
-        saved.getAccount().addOrder(saved);
+    private void createDebitForAccount(Account account, Double value) {
+        DepositWithdrawal deposit = new DepositWithdrawal();
+        deposit.setOperationType(OperationType.DEBIT);
+        deposit.setAmount(value);
+        deposit.setAccount(account);
+        deposit.setCreatedOn(new Date());
+        depositWithdrawalRepository.save(deposit);
     }
+
+
 
     public void addAccountOperationToAccount(Order saved) {
         createAccountOperationBasedOnOrder(saved);
@@ -82,16 +93,15 @@ public class AccountService {
     }
 
     private void createAccountOperationBasedOnOrder(Order saved) {
-        AccountOperation accountOperation = new AccountOperation();
-        accountOperation.setAmount(saved.getTotalPrice());
-        accountOperation.setCreatedOn(saved.getCreatedOn());
+        DepositWithdrawal depositWithdrawal = new DepositWithdrawal();
+        depositWithdrawal.setAmount(saved.getTotalPrice());
+        depositWithdrawal.setCreatedOn(saved.getCreatedOn());
         if( saved.getOpType() == OrderType.BUY ) {
-            accountOperation.setOperationType(OperationType.DEBIT);
+            depositWithdrawal.setOperationType(OperationType.DEBIT);
         } else {
-            accountOperation.setOperationType(OperationType.CREDIT);
+            depositWithdrawal.setOperationType(OperationType.CREDIT);
         }
-        accountOperation.setAccount(saved.getAccount());
-        saved.getAccount().addOperation(accountOperation);
+        depositWithdrawal.setAccount(saved.getAccount());
         accountRepository.save(saved.getAccount());
     }
 }

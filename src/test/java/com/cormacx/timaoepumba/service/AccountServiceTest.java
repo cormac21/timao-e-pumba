@@ -9,7 +9,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -46,9 +46,7 @@ public class AccountServiceTest {
 
         assertTrue(created.isActive());
         assertEquals(0D, created.getBalance());
-        assertEquals(new ArrayList<>(), created.getOperations());
-        assertEquals(new ArrayList<>(), created.getStocks());
-        assertEquals(new ArrayList<>(), created.getOrders());
+        assertEquals(new LinkedHashSet<>(), created.getStocks());
     }
 
     @Test
@@ -57,7 +55,6 @@ public class AccountServiceTest {
 
         accountService.addFundsToAccount(created, 2400.94);
 
-        assertEquals(1, created.getOperations().size());
         assertEquals(2400.94, created.getBalance());
     }
 

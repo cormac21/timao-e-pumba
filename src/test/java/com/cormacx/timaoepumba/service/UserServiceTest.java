@@ -1,6 +1,7 @@
 package com.cormacx.timaoepumba.service;
 
 
+import com.cormacx.timaoepumba.entities.account.Account;
 import com.cormacx.timaoepumba.entities.user.Role;
 import com.cormacx.timaoepumba.entities.user.UserDTO;
 import com.cormacx.timaoepumba.entities.user.UserEntity;
@@ -21,6 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -37,6 +39,9 @@ public class UserServiceTest {
     @Mock
     private RoleRepository roleRepository;
 
+    @Mock
+    private AccountService accountService;
+
     @BeforeEach
     public void init() {
         Role role = new Role();
@@ -49,6 +54,13 @@ public class UserServiceTest {
             user.setId(UUID.randomUUID());
             return user;
         });
+
+        Account account = new Account();
+        account.setUserUUID("some-fake-userr-uuid");
+        account.setBalance(0D);
+        account.setActive(true);
+
+        when(accountService.createNewAccount(anyString())).thenReturn(account);
     }
 
     @Test
@@ -63,7 +75,6 @@ public class UserServiceTest {
         assertNotNull(savedUser.get());
         assertEquals("garboglargh@test.com", savedUser.get().getEmail());
         assertNotNull(savedUser.get().getId());
-        //assertEquals(new ArrayList<>(), savedUser.get().getRoles());
     }
 
     @Test

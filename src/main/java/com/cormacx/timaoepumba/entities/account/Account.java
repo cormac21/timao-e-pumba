@@ -1,6 +1,5 @@
 package com.cormacx.timaoepumba.entities.account;
 
-import com.cormacx.timaoepumba.entities.order.Order;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
@@ -34,17 +33,7 @@ public class Account {
     private boolean active;
 
     @OneToMany(mappedBy = "account")
-    private Set<Order> orders = new LinkedHashSet<>();
-
-    @OneToMany(mappedBy = "account")
-    private Set<AccountOperation> operations = new LinkedHashSet<>();
-
-    @OneToMany(mappedBy = "account")
     private Set<HeldStock> stocks = new LinkedHashSet<>();
-
-    public void addOperation(AccountOperation accountOperation) {
-        operations.add(accountOperation);
-    }
 
     public void addBalance(Double value) {
         balance = balance + value;
@@ -54,7 +43,4 @@ public class Account {
         balance = balance - value;
     }
 
-    public void addOrder(Order saved) {
-        orders.add(saved);
-    }
 }
