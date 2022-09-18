@@ -11,7 +11,7 @@ import java.util.Date;
 public class OrderDTO {
 
     private String userUUID;
-    private String opType;
+    private String type;
     private Integer quantity;
     private String ticker;
     private Double unitPrice;
@@ -20,10 +20,10 @@ public class OrderDTO {
     public static Order toEntity(OrderDTO dto, Account account) throws InvalidOrderTypeException {
         Order order = new Order();
         order.setUserUUID(dto.getUserUUID());
-        if(dto.getOpType().equalsIgnoreCase("c")) {
-            order.setOpType(OrderType.BUY);
-        } else if(dto.getOpType().equalsIgnoreCase("v")) {
-            order.setOpType(OrderType.SELL);
+        if(dto.getType().equalsIgnoreCase("c")) {
+            order.setType(OrderType.BUY);
+        } else if(dto.getType().equalsIgnoreCase("v")) {
+            order.setType(OrderType.SELL);
         } else {
             throw new InvalidOrderTypeException();
         }

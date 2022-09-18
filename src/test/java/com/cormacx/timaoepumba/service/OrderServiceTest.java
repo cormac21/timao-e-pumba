@@ -52,13 +52,13 @@ public class OrderServiceTest {
         incomingOrder = new OrderDTO();
         incomingOrder.setQuantity(200);
         incomingOrder.setTicker("MGLU3");
-        incomingOrder.setOpType("c");
+        incomingOrder.setType("c");
         incomingOrder.setUserUUID("some-fake-user-uuid");
         incomingOrder.setUnitPrice(4.66D);
         Order order = new Order();
         order.setQuantity(200);
         order.setTicker("MGLU3");
-        order.setOpType(OrderType.BUY);
+        order.setType(OrderType.BUY);
         order.setUserUUID("some-fake-user-uuid");
         order.setUnitPrice(4.66D);
         order.setCreatedOn(createdOn);

@@ -1,6 +1,7 @@
 package com.cormacx.timaoepumba.data;
 
 import com.cormacx.timaoepumba.entities.account.Account;
+import com.cormacx.timaoepumba.entities.order.OrderDTO;
 import com.cormacx.timaoepumba.entities.user.Privilege;
 import com.cormacx.timaoepumba.entities.user.Role;
 import com.cormacx.timaoepumba.entities.user.UserDTO;
@@ -8,6 +9,7 @@ import com.cormacx.timaoepumba.entities.user.UserEntity;
 import com.cormacx.timaoepumba.repositories.PrivilegeRepository;
 import com.cormacx.timaoepumba.repositories.RoleRepository;
 import com.cormacx.timaoepumba.service.AccountService;
+import com.cormacx.timaoepumba.service.OrderService;
 import com.cormacx.timaoepumba.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,16 +37,22 @@ public class MigrationStation implements ApplicationListener<ContextRefreshedEve
 
     private final AccountService accountService;
 
+    private final OrderService orderService;
+
+    public String genericGuyId;
+
     @Autowired
     public MigrationStation(UserService userService, RoleRepository roleRepository,
                             PrivilegeRepository privilegeRepository,
                             PasswordEncoder passwordEncoder,
-                            AccountService accountService) {
+                            AccountService accountService,
+                            OrderService orderService) {
         this.userService = userService;
         this.roleRepository = roleRepository;
         this.privilegeRepository = privilegeRepository;
         this.passwordEncoder = passwordEncoder;
         this.accountService = accountService;
+        this.orderService = orderService;
     }
 
     @Override
@@ -58,7 +66,14 @@ public class MigrationStation implements ApplicationListener<ContextRefreshedEve
         final var admin = createRoleIfNotFound("ADMIN", Set.of(manage, write, read));
         createRoleIfNotFound("USER", Set.of(write, read));
         createAdminIfNotFound(admin);
-        createGenericUserIfNotFound();
+        UserEntity genericGuy = createGenericUserIfNotFound();
+        genericGuyId = genericGuy.getId().toString();
+        Optional<Account> acc = accountService.findAccountByUser(genericGuyId);
+        if(acc.isPresent()) {
+            accountService.addFundsToAccount(acc.get(), 5000D);
+        }
+        createSomeStartingOrders();
+
         alreadySetup = true;
     }
 
@@ -96,7 +111,7 @@ public class MigrationStation implements ApplicationListener<ContextRefreshedEve
         }
     }
 
-    private void createGenericUserIfNotFound() {
+    private UserEntity createGenericUserIfNotFound() {
         String bogusEmail = "test@timaoepumba.com";
         Optional<UserEntity> userOp = userService.findUserByEmail(bogusEmail);
         if (userOp.isEmpty()) {
@@ -106,12 +121,37 @@ public class MigrationStation implements ApplicationListener<ContextRefreshedEve
             Optional<UserEntity> saved = userService.createNewUser(newUser);
             if(saved.isPresent()){
                 log.info("User saved: ".concat(saved.get().getId().toString()));
-            }
-            Optional<Account> acc = accountService.findAccountByUser(saved.get().getId().toString());
-            if(acc.isPresent()) {
-                accountService.addFundsToAccount(acc.get(), 5000D);
+                return saved.get();
             }
         }
+        return null;
+    }
+
+    private void createSomeStartingOrders() {
+        OrderDTO firstBuyOrder = new OrderDTO();
+        firstBuyOrder.setUserUUID(genericGuyId);
+        firstBuyOrder.setTicker("MGLU3");
+        firstBuyOrder.setQuantity(300);
+        firstBuyOrder.setUnitPrice(4.5D);
+        firstBuyOrder.setType("c");
+
+        OrderDTO firstSellOrder = new OrderDTO();
+        firstSellOrder.setUserUUID(genericGuyId);
+        firstSellOrder.setTicker("MGLU3");
+        firstSellOrder.setQuantity(300);
+        firstSellOrder.setUnitPrice(4.3D);
+        firstSellOrder.setType("v");
+
+        OrderDTO secondBuyOrder = new OrderDTO();
+        secondBuyOrder.setUserUUID(genericGuyId);
+        secondBuyOrder.setTicker("MGLU3");
+        secondBuyOrder.setQuantity(100);
+        secondBuyOrder.setUnitPrice(4.7D);
+        secondBuyOrder.setType("c");
+
+        orderService.createNewOrder(firstBuyOrder);
+        orderService.createNewOrder(firstSellOrder);
+        orderService.createNewOrder(secondBuyOrder);
     }
 
 }

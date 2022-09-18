@@ -3,6 +3,7 @@ package com.cormacx.timaoepumba.service;
 import com.cormacx.timaoepumba.entities.account.Account;
 import com.cormacx.timaoepumba.entities.order.Order;
 import com.cormacx.timaoepumba.entities.order.OrderDTO;
+import com.cormacx.timaoepumba.entities.order.OrderType;
 import com.cormacx.timaoepumba.repositories.OrderRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,10 +47,6 @@ public class OrderService {
             Optional<Account> accountOp = accountService.findAccountByUser(op.getUserUUID());
             if(accountOp.isPresent()){
                 Order saved = orderRepository.save(OrderDTO.toEntity(op, accountOp.get()));
-                Optional<Account> accAfterOrderSaved = accountService.findAccountByUser(op.getUserUUID());
-                log.info("Account after Order Saved: ".concat(accAfterOrderSaved.get().toString()));
-                processAccountOperationAndHeldStocks(saved);
-
                 return Optional.of(saved);
             }
         }
@@ -71,7 +68,7 @@ public class OrderService {
         if(!isThereEnoughBalanceOnAccount(accountOp.get().getBalance(), op.getQuantity(), op.getUnitPrice())) {
             return false;
         }
-        return op.getOpType().equalsIgnoreCase("c") || op.getOpType().equalsIgnoreCase("v");
+        return op.getType().equalsIgnoreCase("c") || op.getType().equalsIgnoreCase("v");
     }
 
     public boolean isThereEnoughBalanceOnAccount(Double balance, Integer quantity, Double unitPrice) {
@@ -88,5 +85,17 @@ public class OrderService {
         } else {
             return new ArrayList<>();
         }
+    }
+
+    public List<Order> getAllOrders() {
+        return orderRepository.findAll();
+    }
+
+    public Order getLatestBuyOrderFromUserForTicker(String userUUID, String ticker) {
+        return orderRepository.findFirstByUserUUIDAndTickerAndTypeOrderByCreatedOnDesc(userUUID, ticker, OrderType.BUY);
+    }
+
+    public Order getLatestSellOrderFromUserForTicker(String userUUID, String ticker) {
+        return orderRepository.findFirstByUserUUIDAndTickerAndTypeOrderByCreatedOnDesc(userUUID, ticker, OrderType.SELL);
     }
 }

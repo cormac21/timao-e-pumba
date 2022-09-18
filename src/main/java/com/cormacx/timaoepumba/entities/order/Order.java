@@ -29,7 +29,7 @@ public class Order {
     private BigInteger id;
 
     @NotNull
-    private OrderType opType;
+    private OrderType type;
 
     @NotNull
     @Min(value = 1L)

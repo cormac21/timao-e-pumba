@@ -96,7 +96,7 @@ public class AccountService {
         DepositWithdrawal depositWithdrawal = new DepositWithdrawal();
         depositWithdrawal.setAmount(saved.getTotalPrice());
         depositWithdrawal.setCreatedOn(saved.getCreatedOn());
-        if( saved.getOpType() == OrderType.BUY ) {
+        if( saved.getType() == OrderType.BUY ) {
             depositWithdrawal.setOperationType(OperationType.DEBIT);
         } else {
             depositWithdrawal.setOperationType(OperationType.CREDIT);
