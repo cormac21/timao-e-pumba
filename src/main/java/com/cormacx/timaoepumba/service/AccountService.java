@@ -85,11 +85,8 @@ public class AccountService {
         depositWithdrawalRepository.save(deposit);
     }
 
-
-
     public void addAccountOperationToAccount(Order saved) {
         createAccountOperationBasedOnOrder(saved);
-
     }
 
     private void createAccountOperationBasedOnOrder(Order saved) {
@@ -102,6 +99,7 @@ public class AccountService {
             depositWithdrawal.setOperationType(OperationType.CREDIT);
         }
         depositWithdrawal.setAccount(saved.getAccount());
-        accountRepository.save(saved.getAccount());
+        depositWithdrawalRepository.save(depositWithdrawal);
+
     }
 }

@@ -22,6 +22,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -36,11 +38,16 @@ public class OrderServiceTest {
     @Mock
     private AccountService accountService;
 
+    @Mock
+    private HeldStockService heldStockService;
+
     OrderDTO incomingOrder;
+
+    Account account;
 
     @BeforeEach
     public void setup() {
-        Account account = new Account();
+        account = new Account();
         account.setActive(true);
         account.setUserUUID("some-fake-user-uuid");
         account.setBalance(5000.33D);
@@ -91,7 +98,14 @@ public class OrderServiceTest {
     public void shouldSaveNewHeldStockToAccountWhenProcessingBuyOrder() {
         Optional<Order> created = orderService.createNewOrder(incomingOrder);
 
-        assertNotNull(created.get().getAccount());
+        verify(heldStockService, times(1)).createOrUpdateHeldStock(created.get());
+    }
+
+    @Test
+    public void shouldSaveNewAccountOperationWhenProcessingBuyOrder() {
+        Optional<Order> created = orderService.createNewOrder(incomingOrder);
+
+        verify(accountService, times(1)).addAccountOperationToAccount(created.get());
     }
 
 }

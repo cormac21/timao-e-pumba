@@ -9,6 +9,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import java.util.Date;
 
 @Entity
 @Table(name = "held_stocks")
@@ -28,6 +29,8 @@ public class HeldStock {
     private Double totalPrice;
 
     private Double averagePrice;
+
+    private Date lastAcquired;
 
     @ManyToOne
     @JoinColumn(nullable = false)

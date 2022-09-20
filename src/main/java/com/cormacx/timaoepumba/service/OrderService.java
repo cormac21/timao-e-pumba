@@ -29,10 +29,13 @@ public class OrderService {
 
     private final AccountService accountService;
 
+    private final HeldStockService heldStockService;
+
     @Autowired
-    public OrderService(OrderRepository orderRepository, AccountService accountService) {
+    public OrderService(OrderRepository orderRepository, AccountService accountService, HeldStockService heldStockService) {
         this.orderRepository = orderRepository;
         this.accountService = accountService;
+        this.heldStockService = heldStockService;
     }
 
 
@@ -47,6 +50,7 @@ public class OrderService {
             Optional<Account> accountOp = accountService.findAccountByUser(op.getUserUUID());
             if(accountOp.isPresent()){
                 Order saved = orderRepository.save(OrderDTO.toEntity(op, accountOp.get()));
+                processAccountOperationAndHeldStocks(saved);
                 return Optional.of(saved);
             }
         }
@@ -54,10 +58,8 @@ public class OrderService {
     }
 
     private void processAccountOperationAndHeldStocks(Order savedOrder) {
-        //accountService.addOrderToAccount(savedOrder);
-        //accountService.addAccountOperationToAccount(savedOrder);
-        //accountService.subtractFundsFromAccount(savedOrder.getTotalPrice());
-
+        accountService.addAccountOperationToAccount(savedOrder);
+        heldStockService.createOrUpdateHeldStock(savedOrder);
     }
 
     public boolean isValidOrder(OrderDTO op) {
