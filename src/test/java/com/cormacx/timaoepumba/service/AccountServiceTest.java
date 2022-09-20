@@ -14,25 +14,20 @@ import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.mockito.stubbing.Answer;
 
-import java.math.BigInteger;
 import java.util.Date;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 
 @ExtendWith(MockitoExtension.class)
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class AccountServiceTest {
 
     @InjectMocks
@@ -46,42 +41,46 @@ public class AccountServiceTest {
 
     private String randomUserUUID;
 
+    private boolean setup = false;
+
     Account account;
     Order buyOrder;
     Order sellOrder;
 
     Date now;
 
-    @BeforeAll
+    @BeforeEach
     public void setup() {
-        randomUserUUID = UUID.randomUUID().toString();
-        account = new Account();
-        account.setUserUUID(randomUserUUID);
-        account.setBalance(0D);
-        account.setActive(true);
-        account.setId(1L);
+        if(!setup) {
+            randomUserUUID = UUID.randomUUID().toString();
+            account = new Account();
+            account.setUserUUID(randomUserUUID);
+            account.setBalance(0D);
+            account.setActive(true);
+            account.setId(1L);
 
-        now = new Date();
+            now = new Date();
 
-        buyOrder = new Order();
-        buyOrder.setAccount(account);
-        buyOrder.setTicker("EGIE3");
-        buyOrder.setUnitPrice(45.2D);
-        buyOrder.setType(OrderType.BUY);
-        buyOrder.setUserUUID(randomUserUUID);
-        buyOrder.setQuantity(300);
-        buyOrder.setTotalPrice(13560D);
-        buyOrder.setCreatedOn(now);
+            buyOrder = new Order();
+            buyOrder.setAccount(account);
+            buyOrder.setTicker("EGIE3");
+            buyOrder.setUnitPrice(45.2D);
+            buyOrder.setType(OrderType.BUY);
+            buyOrder.setUserUUID(randomUserUUID);
+            buyOrder.setQuantity(300);
+            buyOrder.setTotalPrice(13560D);
+            buyOrder.setCreatedOn(now);
 
-        sellOrder = new Order();
-        sellOrder.setAccount(account);
-        sellOrder.setTicker("EGIE3");
-        sellOrder.setUnitPrice(45.2D);
-        sellOrder.setType(OrderType.SELL);
-        sellOrder.setUserUUID(randomUserUUID);
-        sellOrder.setQuantity(200);
-        sellOrder.setTotalPrice(9040D);
-        sellOrder.setCreatedOn(now);
+            sellOrder = new Order();
+            sellOrder.setAccount(account);
+            sellOrder.setTicker("EGIE3");
+            sellOrder.setUnitPrice(45.2D);
+            sellOrder.setType(OrderType.SELL);
+            sellOrder.setUserUUID(randomUserUUID);
+            sellOrder.setQuantity(200);
+            sellOrder.setTotalPrice(9040D);
+            sellOrder.setCreatedOn(now);
+        }
     }
 
     @Test
@@ -106,6 +105,8 @@ public class AccountServiceTest {
 
     @Test
     public void whenProcessingBuyOrderCreatesADebitWithdraw() {
+
+
         accountService.addAccountOperationToAccount(buyOrder);
         DepositWithdrawal expected = new DepositWithdrawal();
         expected.setAccount(account);
@@ -114,6 +115,7 @@ public class AccountServiceTest {
         expected.setOperationType(OperationType.DEBIT);
         expected.setAccount(account);
         verify(depositWithdrawalRepository, times(1)).save(expected);
+        //verify(accountRepository, times(1)).save();
     }
 
     @Test
