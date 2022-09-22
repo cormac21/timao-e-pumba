@@ -58,7 +58,7 @@ public class OrderService {
     }
 
     private void processAccountOperationAndHeldStocks(Order savedOrder) {
-        accountService.addAccountOperationToAccount(savedOrder);
+        accountService.addNewDepositWithdrawalAndUpdateBalance(savedOrder);
         heldStockService.createOrUpdateHeldStock(savedOrder);
     }
 

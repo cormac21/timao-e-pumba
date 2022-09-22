@@ -7,21 +7,21 @@ import com.cormacx.timaoepumba.entities.order.Order;
 import com.cormacx.timaoepumba.entities.order.OrderType;
 import com.cormacx.timaoepumba.repositories.AccountRepository;
 import com.cormacx.timaoepumba.repositories.DepositWithdrawalRepository;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Date;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -37,7 +37,7 @@ public class AccountServiceTest {
     AccountRepository accountRepository;
 
     @Mock
-    DepositWithdrawalRepository depositWithdrawalRepository;
+    DepositWithdrawalService depositWithdrawalService;
 
     private String randomUserUUID;
 
@@ -80,6 +80,7 @@ public class AccountServiceTest {
             sellOrder.setQuantity(200);
             sellOrder.setTotalPrice(9040D);
             sellOrder.setCreatedOn(now);
+            setup = true;
         }
     }
 
@@ -105,29 +106,52 @@ public class AccountServiceTest {
 
     @Test
     public void whenProcessingBuyOrderCreatesADebitWithdraw() {
-
-
-        accountService.addAccountOperationToAccount(buyOrder);
+        accountService.addNewDepositWithdrawalAndUpdateBalance(buyOrder);
         DepositWithdrawal expected = new DepositWithdrawal();
         expected.setAccount(account);
         expected.setCreatedOn(now);
         expected.setAmount(13560D);
         expected.setOperationType(OperationType.DEBIT);
         expected.setAccount(account);
-        verify(depositWithdrawalRepository, times(1)).save(expected);
-        //verify(accountRepository, times(1)).save();
+        verify(depositWithdrawalService, times(1)).createNewDepositWithdrawal(expected);
     }
 
     @Test
     public void whenProcessingSellOrderCreatesACreditDeposit(){
-        accountService.addAccountOperationToAccount(sellOrder);
+        accountService.addNewDepositWithdrawalAndUpdateBalance(sellOrder);
         DepositWithdrawal expected = new DepositWithdrawal();
         expected.setAccount(account);
         expected.setCreatedOn(now);
         expected.setAmount(9040D);
         expected.setOperationType(OperationType.CREDIT);
         expected.setAccount(account);
-        verify(depositWithdrawalRepository, times(1)).save(expected);
+        verify(depositWithdrawalService, times(1)).createNewDepositWithdrawal(expected);
+    }
+
+    @Test
+    public void whenProcessingBuyOrderUpdatesAccountBalance() {
+        when(accountRepository.findById(anyLong())).thenReturn(Optional.of(account));
+        accountService.addNewDepositWithdrawalAndUpdateBalance(buyOrder);
+        Account expected = new Account();
+        expected.setUserUUID(randomUserUUID);
+        expected.setActive(true);
+        expected.setId(1L);
+        expected.setBalance(-13560D);
+
+        verify(accountRepository).save(expected);
+    }
+
+    @Test
+    public void whenProcessingSellOrderUpdatesAccountBalance() {
+        when(accountRepository.findById(anyLong())).thenReturn(Optional.of(account));
+        accountService.addNewDepositWithdrawalAndUpdateBalance(sellOrder);
+        Account expected = new Account();
+        expected.setUserUUID(randomUserUUID);
+        expected.setActive(true);
+        expected.setId(1L);
+        expected.setBalance(9040D);
+
+        verify(accountRepository).save(expected);
     }
 
 }

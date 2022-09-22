@@ -45,39 +45,43 @@ public class OrderServiceTest {
 
     Account account;
 
+    boolean setup;
+
     @BeforeEach
     public void setup() {
-        account = new Account();
-        account.setActive(true);
-        account.setUserUUID("some-fake-user-uuid");
-        account.setBalance(5000.33D);
-        Optional<Account> accountOp = Optional.of(account);
-        when(accountService.findAccountByUser("some-fake-user-uuid")).thenReturn(accountOp);
+        if(!setup) {
+            account = new Account();
+            account.setActive(true);
+            account.setUserUUID("some-fake-user-uuid");
+            account.setBalance(5000.33D);
+            Optional<Account> accountOp = Optional.of(account);
+            when(accountService.findAccountByUser("some-fake-user-uuid")).thenReturn(accountOp);
 
-        Date createdOn = new Date();
+            Date createdOn = new Date();
 
-        incomingOrder = new OrderDTO();
-        incomingOrder.setQuantity(200);
-        incomingOrder.setTicker("MGLU3");
-        incomingOrder.setType("c");
-        incomingOrder.setUserUUID("some-fake-user-uuid");
-        incomingOrder.setUnitPrice(4.66D);
-        Order order = new Order();
-        order.setQuantity(200);
-        order.setTicker("MGLU3");
-        order.setType(OrderType.BUY);
-        order.setUserUUID("some-fake-user-uuid");
-        order.setUnitPrice(4.66D);
-        order.setCreatedOn(createdOn);
-        order.setAccount(account);
-        order.setTotalPrice(932D);
+            incomingOrder = new OrderDTO();
+            incomingOrder.setQuantity(200);
+            incomingOrder.setTicker("MGLU3");
+            incomingOrder.setType("c");
+            incomingOrder.setUserUUID("some-fake-user-uuid");
+            incomingOrder.setUnitPrice(4.66D);
+            Order order = new Order();
+            order.setQuantity(200);
+            order.setTicker("MGLU3");
+            order.setType(OrderType.BUY);
+            order.setUserUUID("some-fake-user-uuid");
+            order.setUnitPrice(4.66D);
+            order.setCreatedOn(createdOn);
+            order.setAccount(account);
+            order.setTotalPrice(932D);
 
-        when(orderRepository.save(any(Order.class))).thenAnswer((Answer<Order>) invocation -> {
-            Order order1 = invocation.getArgument(0);
-            order1.setId(BigInteger.valueOf(1));
-            return order1;
-        });
-
+            when(orderRepository.save(any(Order.class))).thenAnswer((Answer<Order>) invocation -> {
+                Order order1 = invocation.getArgument(0);
+                order1.setId(BigInteger.valueOf(1));
+                return order1;
+            });
+            setup = true;
+        }
     }
 
     @Test
@@ -105,7 +109,7 @@ public class OrderServiceTest {
     public void shouldSaveNewAccountOperationWhenProcessingBuyOrder() {
         Optional<Order> created = orderService.createNewOrder(incomingOrder);
 
-        verify(accountService, times(1)).addAccountOperationToAccount(created.get());
+        verify(accountService, times(1)).addNewDepositWithdrawalAndUpdateBalance(created.get());
     }
 
 }
