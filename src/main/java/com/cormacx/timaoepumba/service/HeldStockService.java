@@ -37,7 +37,7 @@ public class HeldStockService {
     }
 
     private HeldStock mergeHeldStock(Order savedOrder, HeldStock heldStock) {
-        long combinedQuantity = savedOrder.getQuantity() + heldStock.getQuantity();
+        Integer combinedQuantity = savedOrder.getQuantity() + heldStock.getQuantity();
         double combinedTotalPrice = savedOrder.getTotalPrice() + heldStock.getTotalPrice();
         double combinedAveragePrice = combinedTotalPrice / combinedQuantity;
 

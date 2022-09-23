@@ -2,6 +2,7 @@ package com.cormacx.timaoepumba.service;
 
 import com.cormacx.timaoepumba.entities.account.Account;
 import com.cormacx.timaoepumba.entities.account.HeldStock;
+import com.cormacx.timaoepumba.entities.account.HeldStockStatus;
 import com.cormacx.timaoepumba.entities.order.Order;
 import com.cormacx.timaoepumba.entities.order.OrderType;
 import com.cormacx.timaoepumba.repositories.HeldStockRepository;
@@ -36,6 +37,9 @@ public class HeldStockServiceTest {
     @Mock
     HeldStockRepository heldStockRepository;
 
+    @Mock
+    ProfitLossService profitLossService;
+
     private String randomUserUUID = UUID.randomUUID().toString();
     private HeldStock exampleStock;
 
@@ -52,7 +56,7 @@ public class HeldStockServiceTest {
             account.setActive(true);
 
             exampleStock = new HeldStock();
-            exampleStock.setQuantity(100L);
+            exampleStock.setQuantity(100);
             exampleStock.setTicker("MGLU3");
             exampleStock.setAveragePrice(4.7D);
             exampleStock.setTotalPrice(470D);
@@ -98,6 +102,40 @@ public class HeldStockServiceTest {
         assertEquals(resultingStock.getLastAcquired(), order.getCreatedOn());
         assertEquals(4.83D, resultingStock.getAveragePrice());
         reset(heldStockRepository);
+    }
+
+    @Test
+    public void callsProfitLossServiceIfSellOrder(){
+        when(heldStockRepository.save(any(HeldStock.class))).thenAnswer((Answer<HeldStock>) invocation -> {
+            HeldStock stock = invocation.getArgument(0);
+            stock.setId(1L);
+            return stock;
+        });
+        HeldStock accountHeldStock = heldStockService.save(exampleStock);
+        Order order = new Order(OrderType.SELL, 100, "MGLU3", 5.26D, 526D, randomUserUUID,
+                new Date(), account);
+
+        HeldStock resultingStock = heldStockService.createOrUpdateHeldStock(order);
+
+        verify(profitLossService, times(1)).registerProfitLoss(accountHeldStock, order);
+
+    }
+
+    @Test
+    public void clearsHeldStockIfIncomingSellOrderSellsEverything() {
+        when(heldStockRepository.save(any(HeldStock.class))).thenAnswer((Answer<HeldStock>) invocation -> {
+            HeldStock stock = invocation.getArgument(0);
+            stock.setId(1L);
+            return stock;
+        });
+        heldStockService.save(exampleStock);
+        Order order = new Order(OrderType.SELL, 100, "MGLU3", 4.9D, 490D, randomUserUUID,
+                new Date(), account);
+
+        HeldStock resultingStock = heldStockService.createOrUpdateHeldStock(order);
+
+        assertEquals(HeldStockStatus.CLOSED, resultingStock.getStatus());
+
     }
 
     @Test

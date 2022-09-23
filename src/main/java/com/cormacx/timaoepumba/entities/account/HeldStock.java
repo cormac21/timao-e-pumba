@@ -20,7 +20,7 @@ public class HeldStock {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Long quantity;
+    private Integer quantity;
 
     private String ticker;
 
@@ -35,5 +35,7 @@ public class HeldStock {
     @ManyToOne
     @JoinColumn(nullable = false)
     private Account account;
+
+    private HeldStockStatus status;
 
 }

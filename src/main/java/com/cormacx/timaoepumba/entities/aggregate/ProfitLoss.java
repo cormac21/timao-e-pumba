@@ -20,7 +20,9 @@ public class ProfitLoss {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private BigInteger id;
 
-    private double value;
+    private double totalValue;
+
+    private double average;
 
     @OneToOne
     private HeldStock originatingStockSold;
