@@ -16,6 +16,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.UUID;
 
@@ -43,6 +44,10 @@ public class HeldStockServiceTest {
     private String randomUserUUID = UUID.randomUUID().toString();
     private HeldStock exampleStock;
 
+    private Order exampleBuyOrder;
+
+    private Date exampleBuyOrderDate = new Date();
+
     private Account account;
 
     private boolean setup;
@@ -63,23 +68,57 @@ public class HeldStockServiceTest {
             exampleStock.setAccount(account);
             exampleStock.setLastAcquired(new Date());
 
+            exampleBuyOrder = new Order();
+            exampleBuyOrder.setType(OrderType.BUY);
+            exampleBuyOrder.setAccount(account);
+            exampleBuyOrder.setQuantity(100);
+            exampleBuyOrder.setUnitPrice(4.7D);
+            exampleBuyOrder.setUserUUID(randomUserUUID);
+            exampleBuyOrder.setTicker("MGLU3");
+            exampleBuyOrder.setCreatedOn(exampleBuyOrderDate);
+
             setup = true;
         }
     }
 
     @Test
-    public void canSaveNewHeldStock(){
+    public void canSaveNewHeldStockOnBuyOrder(){
         when(heldStockRepository.save(any(HeldStock.class))).thenAnswer((Answer<HeldStock>) invocation -> {
             HeldStock stock = invocation.getArgument(0);
             stock.setId(1L);
             return stock;
         });
+        Order order = new Order(OrderType.BUY, 400, "EGIE3", 40.70D,
+                randomUserUUID, new Date(), account);
 
-        HeldStock saved = heldStockService.save(exampleStock);
+        HeldStock saved = heldStockService.createOrUpdateHeldStock(order);
 
         verify(heldStockRepository, times(1)).save(exampleStock);
         assertNotNull(saved.getId() != null);
         reset(heldStockRepository);
+    }
+
+    @Test
+    public void canCreateNewHeldStockBasedOnOrder() {
+        when(heldStockRepository.save(any(HeldStock.class))).thenAnswer((Answer<HeldStock>) invocation -> {
+            HeldStock stock = invocation.getArgument(0);
+            stock.setId(1L);
+            return stock;
+        });
+        when(heldStockRepository.findAllByAccount(any(Account.class))).thenReturn(Collections.emptyList());
+        Date orderDate = new Date();
+        Order incomingBuyOrder = new Order(OrderType.BUY, 300, "MGLU3", 5.1D,
+                randomUserUUID, orderDate, account);
+
+        HeldStock saved = heldStockService.createOrUpdateHeldStock(incomingBuyOrder);
+
+        assertEquals(300, saved.getQuantity());
+        assertEquals("MGLU3", saved.getTicker());
+        assertEquals(1530D, saved.getTotalPrice());
+        assertEquals(5.1D, saved.getAveragePrice());
+        assertEquals(account , saved.getAccount());
+        assertEquals(HeldStockStatus.HELD, saved.getStatus());
+        assertEquals(orderDate, saved.getLastAcquired());
     }
 
     @Test
@@ -89,10 +128,9 @@ public class HeldStockServiceTest {
             stock.setId(1L);
             return stock;
         });
-        heldStockService.save(exampleStock);
-        Order order = new Order(OrderType.BUY, 200, "MGLU3", 4.9D, 980D, randomUserUUID,
-                new Date(), account);
         when(heldStockRepository.findAllByAccount(any(Account.class))).thenReturn(Arrays.asList(exampleStock));
+        Order order = new Order(OrderType.BUY, 200, "MGLU3", 4.9D, randomUserUUID,
+                new Date(), account);
 
         HeldStock resultingStock = heldStockService.createOrUpdateHeldStock(order);
 
@@ -105,42 +143,63 @@ public class HeldStockServiceTest {
     }
 
     @Test
+    public void canMergeStockWithIncomingSellOrder() {
+        when(heldStockRepository.save(any(HeldStock.class))).thenAnswer((Answer<HeldStock>) invocation -> {
+            HeldStock stock = invocation.getArgument(0);
+            stock.setId(1L);
+            return stock;
+        });
+        when(heldStockRepository.findAllByAccount(any(Account.class))).thenReturn(Arrays.asList(exampleStock));
+        Order order = new Order(OrderType.SELL, 50, "MGLU3", 5.26D, randomUserUUID,
+                new Date(), account);
+
+        HeldStock resultingStock = heldStockService.createOrUpdateHeldStock(order);
+        assertEquals(50, resultingStock.getQuantity());
+        assertEquals("MGLU3", resultingStock.getTicker());
+        assertEquals(235D, resultingStock.getTotalPrice());
+        assertEquals( 4.7D, resultingStock.getAveragePrice());
+        reset(heldStockRepository);
+    }
+
+    @Test
     public void callsProfitLossServiceIfSellOrder(){
         when(heldStockRepository.save(any(HeldStock.class))).thenAnswer((Answer<HeldStock>) invocation -> {
             HeldStock stock = invocation.getArgument(0);
             stock.setId(1L);
             return stock;
         });
-        HeldStock accountHeldStock = heldStockService.save(exampleStock);
-        Order order = new Order(OrderType.SELL, 100, "MGLU3", 5.26D, 526D, randomUserUUID,
+
+        HeldStock accountHeldStock = heldStockService.createOrUpdateHeldStock(exampleBuyOrder);
+        Order order = new Order(OrderType.SELL, 100, "MGLU3", 5.26D, randomUserUUID,
                 new Date(), account);
 
-        HeldStock resultingStock = heldStockService.createOrUpdateHeldStock(order);
+        heldStockService.createOrUpdateHeldStock(order);
 
         verify(profitLossService, times(1)).registerProfitLoss(accountHeldStock, order);
-
+        reset(heldStockRepository);
     }
 
     @Test
-    public void clearsHeldStockIfIncomingSellOrderSellsEverything() {
+    public void closesHeldStockIfIncomingSellOrderSellsEverything() {
         when(heldStockRepository.save(any(HeldStock.class))).thenAnswer((Answer<HeldStock>) invocation -> {
             HeldStock stock = invocation.getArgument(0);
             stock.setId(1L);
             return stock;
         });
-        heldStockService.save(exampleStock);
-        Order order = new Order(OrderType.SELL, 100, "MGLU3", 4.9D, 490D, randomUserUUID,
+        when(heldStockRepository.findAllByAccount(any(Account.class))).thenReturn(Arrays.asList(exampleStock));
+        heldStockService.createOrUpdateHeldStock(exampleBuyOrder);
+        Order order = new Order(OrderType.SELL, 100, "MGLU3", 4.9D, randomUserUUID,
                 new Date(), account);
 
         HeldStock resultingStock = heldStockService.createOrUpdateHeldStock(order);
 
         assertEquals(HeldStockStatus.CLOSED, resultingStock.getStatus());
-
+        reset(heldStockRepository);
     }
 
     @Test
     public void throwsExceptionIfOrderHasNoAccount() {
-        Order order = new Order(OrderType.BUY, 200, "MGLU3", 4.9D, 980D, randomUserUUID,
+        Order order = new Order(OrderType.BUY, 200, "MGLU3", 4.9D, randomUserUUID,
                 new Date(), null);
 
         assertThrows(InvalidOrderException.class, () -> {
@@ -150,7 +209,7 @@ public class HeldStockServiceTest {
 
     @Test
     public void throwsExceptionIfSellOrderHasMoreQuantityThanExisting() {
-        Order order = new Order(OrderType.SELL, 200, "MGLU3", 4.9D, 980D, randomUserUUID,
+        Order order = new Order(OrderType.SELL, 200, "MGLU3", 4.9D, randomUserUUID,
                 new Date(), account);
         when(heldStockRepository.findAllByAccount(any(Account.class))).thenReturn(Arrays.asList(exampleStock));
 

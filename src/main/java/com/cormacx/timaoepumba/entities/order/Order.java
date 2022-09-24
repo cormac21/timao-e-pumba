@@ -53,12 +53,12 @@ public class Order {
     @JoinColumn(name = "account_id", referencedColumnName = "id", nullable = false)
     private Account account;
 
-    public Order(OrderType type, Integer quantity, String ticker, Double unitPrice, Double totalPrice, String userUUID, Date createdOn, Account account) {
+    public Order(OrderType type, Integer quantity, String ticker, Double unitPrice, String userUUID, Date createdOn, Account account) {
         this.type = type;
         this.quantity = quantity;
         this.ticker = ticker;
         this.unitPrice = unitPrice;
-        this.totalPrice = totalPrice;
+        this.totalPrice = unitPrice * quantity;
         this.userUUID = userUUID;
         this.createdOn = createdOn;
         this.account = account;

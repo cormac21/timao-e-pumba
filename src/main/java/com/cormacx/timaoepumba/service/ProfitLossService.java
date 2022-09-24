@@ -18,7 +18,7 @@ public class ProfitLossService {
     }
 
 
-    public void registerProfitLoss(HeldStock accountHeldStock, Order order) {
+    public ProfitLoss registerProfitLoss(HeldStock accountHeldStock, Order order) {
         ProfitLoss profitLoss = new ProfitLoss();
         profitLoss.setSellOrder(order);
         profitLoss.setOriginatingStockSold(accountHeldStock);
@@ -27,8 +27,10 @@ public class ProfitLossService {
         Integer quantity = accountHeldStock.getQuantity() - order.getQuantity();
         profitLoss.setAverage(totalAmount/quantity);
 
-        //profitLoss.setDifferenceInTime();
+        long differenceInTime = order.getCreatedOn().getTime() - accountHeldStock.getLastAcquired().getTime();
+        profitLoss.setDifferenceInTime(differenceInTime);
 
-
+        return profitLoss;
     }
+
 }
