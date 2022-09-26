@@ -89,13 +89,15 @@ public class HeldStockServiceTest {
             stock.setId(1L);
             return stock;
         });
+        Date date = new Date();
         Order order = new Order(OrderType.BUY, 400, "EGIE3", 40.70D,
-                randomUserUUID, new Date(), account);
+                randomUserUUID, date, account);
 
         HeldStock saved = heldStockService.createOrUpdateHeldStock(order);
 
-        verify(heldStockRepository, times(1)).save(exampleStock);
-        assertNotNull(saved.getId() != null);
+        HeldStock expected = new HeldStock(400, "EGIE3", 16280D, 40.7D, date, account, HeldStockStatus.HELD);
+        expected.setId(1L);
+        verify(heldStockRepository, times(1)).save(expected);
         reset(heldStockRepository);
     }
 

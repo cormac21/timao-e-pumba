@@ -58,7 +58,7 @@ public class Order {
         this.quantity = quantity;
         this.ticker = ticker;
         this.unitPrice = unitPrice;
-        this.totalPrice = unitPrice * quantity;
+        this.totalPrice = Math.floor(unitPrice * quantity);
         this.userUUID = userUUID;
         this.createdOn = createdOn;
         this.account = account;

@@ -9,6 +9,7 @@ import exceptions.InvalidOrderException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.text.DecimalFormat;
 import java.util.List;
 
 @Service
@@ -17,6 +18,8 @@ public class HeldStockService {
     private final HeldStockRepository heldStockRepository;
 
     private final ProfitLossService profitLossService;
+
+    private static final DecimalFormat df = new DecimalFormat("0.00");
 
     @Autowired
     public HeldStockService(HeldStockRepository heldStockRepository, ProfitLossService profitLossService) {
@@ -63,7 +66,7 @@ public class HeldStockService {
         if (savedOrder.getType() == OrderType.BUY){
             combinedQuantity = savedOrder.getQuantity() + heldStock.getQuantity();
             combinedTotalPrice = savedOrder.getTotalPrice() + heldStock.getTotalPrice();
-            combinedAveragePrice = combinedTotalPrice / combinedQuantity;
+            combinedAveragePrice = Double.parseDouble(df.format(combinedTotalPrice / combinedQuantity));
             heldStock.setLastAcquired(savedOrder.getCreatedOn());
             heldStock.setStatus(HeldStockStatus.HELD);
         } else if (savedOrder.getType() == OrderType.SELL) {
