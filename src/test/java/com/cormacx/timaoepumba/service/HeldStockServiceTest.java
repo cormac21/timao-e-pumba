@@ -73,6 +73,7 @@ public class HeldStockServiceTest {
             exampleBuyOrder.setAccount(account);
             exampleBuyOrder.setQuantity(100);
             exampleBuyOrder.setUnitPrice(4.7D);
+            exampleBuyOrder.setTotalPrice(470D);
             exampleBuyOrder.setUserUUID(randomUserUUID);
             exampleBuyOrder.setTicker("MGLU3");
             exampleBuyOrder.setCreatedOn(exampleBuyOrderDate);
@@ -162,24 +163,6 @@ public class HeldStockServiceTest {
     }
 
     @Test
-    public void callsProfitLossServiceIfSellOrder(){
-        when(heldStockRepository.save(any(HeldStock.class))).thenAnswer((Answer<HeldStock>) invocation -> {
-            HeldStock stock = invocation.getArgument(0);
-            stock.setId(1L);
-            return stock;
-        });
-
-        HeldStock accountHeldStock = heldStockService.createOrUpdateHeldStock(exampleBuyOrder);
-        Order order = new Order(OrderType.SELL, 100, "MGLU3", 5.26D, randomUserUUID,
-                new Date(), account);
-
-        heldStockService.createOrUpdateHeldStock(order);
-
-        verify(profitLossService, times(1)).registerProfitLoss(accountHeldStock, order);
-        reset(heldStockRepository);
-    }
-
-    @Test
     public void closesHeldStockIfIncomingSellOrderSellsEverything() {
         when(heldStockRepository.save(any(HeldStock.class))).thenAnswer((Answer<HeldStock>) invocation -> {
             HeldStock stock = invocation.getArgument(0);
@@ -187,13 +170,33 @@ public class HeldStockServiceTest {
             return stock;
         });
         when(heldStockRepository.findAllByAccount(any(Account.class))).thenReturn(Arrays.asList(exampleStock));
-        heldStockService.createOrUpdateHeldStock(exampleBuyOrder);
         Order order = new Order(OrderType.SELL, 100, "MGLU3", 4.9D, randomUserUUID,
                 new Date(), account);
 
         HeldStock resultingStock = heldStockService.createOrUpdateHeldStock(order);
 
         assertEquals(HeldStockStatus.CLOSED, resultingStock.getStatus());
+        reset(heldStockRepository);
+    }
+
+    @Test
+    public void callsProfitLossServiceIfSellOrder(){
+        when(heldStockRepository.save(any(HeldStock.class))).thenAnswer((Answer<HeldStock>) invocation -> {
+            HeldStock stock = invocation.getArgument(0);
+            stock.setId(1L);
+            return stock;
+        });
+        when(heldStockRepository.findAllByAccount(any(Account.class))).thenReturn(Arrays.asList(exampleStock));
+
+        Order order = new Order(OrderType.SELL, 100, "MGLU3", 5.26D, randomUserUUID,
+                new Date(), account);
+        HeldStock resultingStock = new HeldStock(0, "MGLU3", 0D, 4.7D,
+                exampleStock.getLastAcquired(), exampleStock.getAccount(), HeldStockStatus.CLOSED);
+        resultingStock.setId(1L);
+
+        heldStockService.saveHeldStockAndCalculateProfitLoss(order);
+
+        verify(profitLossService, times(1)).registerProfitLoss(resultingStock, order);
         reset(heldStockRepository);
     }
 

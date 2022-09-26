@@ -39,9 +39,14 @@ public class HeldStockService {
             HeldStock resultingMerge = mergeHeldStock(savedOrder, previouslyHeldStock);
             return save(resultingMerge);
         } else {
-
+            HeldStock noMergeStock = new HeldStock(
+                    savedOrder.getQuantity(), savedOrder.getTicker(),
+                    savedOrder.getTotalPrice(), savedOrder.getUnitPrice(),
+                    savedOrder.getCreatedOn(), savedOrder.getAccount(),
+                    HeldStockStatus.HELD
+            );
+            return save(noMergeStock);
         }
-        return null;
     }
 
     public void saveHeldStockAndCalculateProfitLoss(Order savedOrder) {
@@ -60,6 +65,7 @@ public class HeldStockService {
             combinedTotalPrice = savedOrder.getTotalPrice() + heldStock.getTotalPrice();
             combinedAveragePrice = combinedTotalPrice / combinedQuantity;
             heldStock.setLastAcquired(savedOrder.getCreatedOn());
+            heldStock.setStatus(HeldStockStatus.HELD);
         } else if (savedOrder.getType() == OrderType.SELL) {
             combinedQuantity = heldStock.getQuantity() - savedOrder.getQuantity();
             combinedAveragePrice = heldStock.getAveragePrice();

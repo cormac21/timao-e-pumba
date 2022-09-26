@@ -1,6 +1,7 @@
 package com.cormacx.timaoepumba.entities.account;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -14,6 +15,7 @@ import java.util.Date;
 @Entity
 @Table(name = "held_stocks")
 @Data
+@NoArgsConstructor
 public class HeldStock {
 
     @Id
@@ -23,8 +25,6 @@ public class HeldStock {
     private Integer quantity;
 
     private String ticker;
-
-    private String stockName;
 
     private Double totalPrice;
 
@@ -38,4 +38,13 @@ public class HeldStock {
 
     private HeldStockStatus status;
 
+    public HeldStock(Integer quantity, String ticker, Double totalPrice, Double averagePrice, Date lastAcquired, Account account, HeldStockStatus status) {
+        this.quantity = quantity;
+        this.ticker = ticker;
+        this.totalPrice = totalPrice;
+        this.averagePrice = averagePrice;
+        this.lastAcquired = lastAcquired;
+        this.account = account;
+        this.status = status;
+    }
 }
