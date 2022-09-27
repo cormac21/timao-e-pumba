@@ -37,4 +37,9 @@ public class Account {
         balance = balance - value;
     }
 
+    public Account(@NonNull String userUUID, Double balance, boolean active) {
+        this.userUUID = userUUID;
+        this.balance = balance;
+        this.active = active;
+    }
 }

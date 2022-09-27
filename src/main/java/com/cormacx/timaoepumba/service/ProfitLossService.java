@@ -19,18 +19,13 @@ public class ProfitLossService {
 
 
     public ProfitLoss registerProfitLoss(HeldStock accountHeldStock, Order order) {
-        ProfitLoss profitLoss = new ProfitLoss();
-        profitLoss.setSellOrder(order);
-        profitLoss.setOriginatingStockSold(accountHeldStock);
-        profitLoss.setTotalValue(accountHeldStock.getTotalPrice() - order.getTotalPrice());
-        double totalAmount = accountHeldStock.getTotalPrice() - order.getTotalPrice();
-        Integer quantity = accountHeldStock.getQuantity() - order.getQuantity();
-        profitLoss.setAverage(totalAmount/quantity);
+        ProfitLoss profitLoss = new ProfitLoss(accountHeldStock, order);
 
-        long differenceInTime = order.getCreatedOn().getTime() - accountHeldStock.getLastAcquired().getTime();
-        profitLoss.setDifferenceInTime(differenceInTime);
+        return save(profitLoss);
+    }
 
-        return profitLoss;
+    private ProfitLoss save(ProfitLoss profitLoss) {
+        return profitLossRepository.save(profitLoss);
     }
 
 }

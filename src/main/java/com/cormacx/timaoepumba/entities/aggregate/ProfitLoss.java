@@ -1,6 +1,5 @@
 package com.cormacx.timaoepumba.entities.aggregate;
 
-import com.cormacx.timaoepumba.entities.account.DepositWithdrawal;
 import com.cormacx.timaoepumba.entities.account.HeldStock;
 import com.cormacx.timaoepumba.entities.order.Order;
 import lombok.Data;
@@ -28,11 +27,25 @@ public class ProfitLoss {
     private HeldStock originatingStockSold;
 
     @OneToOne
-    private DepositWithdrawal resultingDepositWithdrawal;
-
-    @OneToOne
     private Order sellOrder;
 
     private long differenceInTime;
 
+    private boolean isDayTrade;
+
+    public ProfitLoss(HeldStock originatingStock, Order sellOrder) {
+        this.originatingStockSold = originatingStock;
+        this.sellOrder = sellOrder;
+        int quantity = originatingStock.getQuantity() - sellOrder.getQuantity();
+        Double boughtMatch = quantity * originatingStock.getAveragePrice();
+        this.totalValue = sellOrder.getTotalPrice() - boughtMatch;
+        this.average = totalValue / quantity;
+        this.differenceInTime = (originatingStock.getLastAcquired().getTime() - sellOrder.getCreatedOn().getTime());
+        if(differenceInTime <= 1000 * 60 * 60 * 24) {
+            this.isDayTrade = true;
+        }
+    }
+
+    protected ProfitLoss() {
+    }
 }
