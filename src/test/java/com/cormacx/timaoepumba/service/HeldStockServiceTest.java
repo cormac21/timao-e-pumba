@@ -2,7 +2,7 @@ package com.cormacx.timaoepumba.service;
 
 import com.cormacx.timaoepumba.entities.account.Account;
 import com.cormacx.timaoepumba.entities.account.HeldStock;
-import com.cormacx.timaoepumba.entities.account.HeldStockStatus;
+import com.cormacx.timaoepumba.entities.aggregate.ProfitLoss;
 import com.cormacx.timaoepumba.entities.order.Order;
 import com.cormacx.timaoepumba.entities.order.OrderType;
 import com.cormacx.timaoepumba.repositories.HeldStockRepository;
@@ -21,7 +21,6 @@ import java.util.Date;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.reset;
@@ -43,6 +42,8 @@ public class HeldStockServiceTest {
 
     private String randomUserUUID = UUID.randomUUID().toString();
     private HeldStock exampleStock;
+
+    private HeldStock exampleStockWithId;
 
     private Order exampleBuyOrder;
 
@@ -67,6 +68,9 @@ public class HeldStockServiceTest {
             exampleStock.setTotalPrice(470D);
             exampleStock.setAccount(account);
             exampleStock.setLastAcquired(new Date());
+
+            exampleStockWithId = exampleStock;
+            exampleStockWithId.setId(1L);
 
             exampleBuyOrder = new Order();
             exampleBuyOrder.setType(OrderType.BUY);
@@ -95,7 +99,7 @@ public class HeldStockServiceTest {
 
         HeldStock saved = heldStockService.createOrUpdateHeldStock(order);
 
-        HeldStock expected = new HeldStock(400, "EGIE3", 16280D, 40.7D, date, account, HeldStockStatus.HELD);
+        HeldStock expected = new HeldStock(400, "EGIE3", 16280D, 40.7D, date, account);
         expected.setId(1L);
         verify(heldStockRepository, times(1)).save(expected);
         reset(heldStockRepository);
@@ -120,7 +124,6 @@ public class HeldStockServiceTest {
         assertEquals(1530D, saved.getTotalPrice());
         assertEquals(5.1D, saved.getAveragePrice());
         assertEquals(account , saved.getAccount());
-        assertEquals(HeldStockStatus.HELD, saved.getStatus());
         assertEquals(orderDate, saved.getLastAcquired());
     }
 
@@ -131,7 +134,7 @@ public class HeldStockServiceTest {
             stock.setId(1L);
             return stock;
         });
-        when(heldStockRepository.findAllByAccount(any(Account.class))).thenReturn(Arrays.asList(exampleStock));
+        when(heldStockRepository.findAllByAccount(any(Account.class))).thenReturn(Arrays.asList(exampleStockWithId));
         Order order = new Order(OrderType.BUY, 200, "MGLU3", 4.9D, randomUserUUID,
                 new Date(), account);
 
@@ -152,7 +155,7 @@ public class HeldStockServiceTest {
             stock.setId(1L);
             return stock;
         });
-        when(heldStockRepository.findAllByAccount(any(Account.class))).thenReturn(Arrays.asList(exampleStock));
+        when(heldStockRepository.findAllByAccount(any(Account.class))).thenReturn(Arrays.asList(exampleStockWithId));
         Order order = new Order(OrderType.SELL, 50, "MGLU3", 5.26D, randomUserUUID,
                 new Date(), account);
 
@@ -165,19 +168,22 @@ public class HeldStockServiceTest {
     }
 
     @Test
-    public void closesHeldStockIfIncomingSellOrderSellsEverything() {
+    public void deletesHeldStockIfIncomingSellOrderSellsEverything() {
         when(heldStockRepository.save(any(HeldStock.class))).thenAnswer((Answer<HeldStock>) invocation -> {
             HeldStock stock = invocation.getArgument(0);
             stock.setId(1L);
             return stock;
         });
-        when(heldStockRepository.findAllByAccount(any(Account.class))).thenReturn(Arrays.asList(exampleStock));
+        when(heldStockRepository.findAllByAccount(any(Account.class))).thenReturn(Arrays.asList(exampleStockWithId));
         Order order = new Order(OrderType.SELL, 100, "MGLU3", 4.9D, randomUserUUID,
                 new Date(), account);
+        HeldStock resultingStock = new HeldStock(0, "MGLU3", 0D, 4.7D,
+                exampleStock.getLastAcquired(), exampleStock.getAccount());
+        resultingStock.setId(1L);
 
-        HeldStock resultingStock = heldStockService.createOrUpdateHeldStock(order);
+        heldStockService.createOrUpdateHeldStock(order);
 
-        assertEquals(HeldStockStatus.CLOSED, resultingStock.getStatus());
+        verify(heldStockRepository, times(1)).delete(resultingStock);
         reset(heldStockRepository);
     }
 
@@ -188,17 +194,16 @@ public class HeldStockServiceTest {
             stock.setId(1L);
             return stock;
         });
-        when(heldStockRepository.findAllByAccount(any(Account.class))).thenReturn(Arrays.asList(exampleStock));
-
+        when(heldStockRepository.findAllByAccount(any(Account.class))).thenReturn(Arrays.asList(exampleStockWithId));
         Order order = new Order(OrderType.SELL, 100, "MGLU3", 5.26D, randomUserUUID,
                 new Date(), account);
-        HeldStock resultingStock = new HeldStock(0, "MGLU3", 0D, 4.7D,
-                exampleStock.getLastAcquired(), exampleStock.getAccount(), HeldStockStatus.CLOSED);
-        resultingStock.setId(1L);
+        ProfitLoss resultingProfitLoss = new ProfitLoss(exampleStockWithId.getAveragePrice(),
+                exampleStockWithId.getTotalPrice(), exampleStockWithId.getLastAcquired(), account.getId(), order);
+        when(profitLossService.registerProfitLoss(any(HeldStock.class), any(Order.class))).thenReturn(resultingProfitLoss);
 
-        heldStockService.saveHeldStockAndCalculateProfitLoss(order);
+        heldStockService.createOrUpdateHeldStock(order);
 
-        verify(profitLossService, times(1)).registerProfitLoss(resultingStock, order);
+        verify(profitLossService, times(1)).registerProfitLoss(exampleStock, order);
         reset(heldStockRepository);
     }
 

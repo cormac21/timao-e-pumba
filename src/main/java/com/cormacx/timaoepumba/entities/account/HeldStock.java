@@ -1,5 +1,6 @@
 package com.cormacx.timaoepumba.entities.account;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -34,17 +35,15 @@ public class HeldStock {
 
     @ManyToOne
     @JoinColumn(nullable = false)
+    @JsonIgnore
     private Account account;
 
-    private HeldStockStatus status;
-
-    public HeldStock(Integer quantity, String ticker, Double totalPrice, Double averagePrice, Date lastAcquired, Account account, HeldStockStatus status) {
+    public HeldStock(Integer quantity, String ticker, Double totalPrice, Double averagePrice, Date lastAcquired, Account account) {
         this.quantity = quantity;
         this.ticker = ticker;
         this.totalPrice = totalPrice;
         this.averagePrice = averagePrice;
         this.lastAcquired = lastAcquired;
         this.account = account;
-        this.status = status;
     }
 }

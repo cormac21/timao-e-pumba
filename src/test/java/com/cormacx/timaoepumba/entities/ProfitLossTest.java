@@ -35,26 +35,19 @@ public class ProfitLossTest {
 
     @Test
     public void canProfitLossCalculateItselfAndProfit() {
-        long DAY_IN_MS = 1000 * 60 * 60 * 24;
-        Date lastWeek = new Date(System.currentTimeMillis() - (7 * DAY_IN_MS));
-
         Order order = new Order(OrderType.SELL, 100, "VALE3", 68.77, randomUserUUID, new Date(), account);
-        HeldStock heldStock = new HeldStock(200, "VALE3", 13196D, 65.98D, lastWeek, account, HeldStockStatus.HELD);
 
-        ProfitLoss profitLoss = new ProfitLoss(heldStock, order);
+        ProfitLoss profitLoss = new ProfitLoss(65.98D, 13196D, new Date(), account.getId(), order);
         assertEquals(279D, profitLoss.getTotalValue());
         assertEquals(2.79D, profitLoss.getAverage());
     }
 
     @Test
     public void canProfitLossCalculateLoss() {
-        long DAY_IN_MS = 1000 * 60 * 60 * 24;
-        Date lastWeek = new Date(System.currentTimeMillis() - (7 * DAY_IN_MS));
-
         Order order = new Order(OrderType.SELL, 100, "VALE3", 61.77, randomUserUUID, new Date(), account);
-        HeldStock heldStock = new HeldStock(200, "VALE3", 13196D, 65.98D, lastWeek, account, HeldStockStatus.HELD);
+        HeldStock heldStock = new HeldStock(200, "VALE3", 13196D, 65.98D, new Date(), account);
 
-        ProfitLoss profitLoss = new ProfitLoss(heldStock, order);
+        ProfitLoss profitLoss = new ProfitLoss(65.98D, 13196D, new Date(), account.getId(), order);
         assertEquals(-421D, profitLoss.getTotalValue());
     }
 
@@ -64,10 +57,17 @@ public class ProfitLossTest {
         Date anHourAgo = new Date(System.currentTimeMillis() - HOUR_IN_MS);
 
         Order order = new Order(OrderType.SELL, 100, "VALE3", 67.27, randomUserUUID, new Date(), account);
-        HeldStock heldStock = new HeldStock(100, "VALE3", 6598D, 65.98D, anHourAgo, account, HeldStockStatus.HELD);
 
-        ProfitLoss profitLoss = new ProfitLoss(heldStock, order);
+        ProfitLoss profitLoss = new ProfitLoss(65.98D, 6598D, anHourAgo, account.getId(), order);
         assertTrue(profitLoss.isDayTrade());
+    }
+
+    @Test
+    public void canCalculateProperAverageIfQuantityIsSame() {
+        Order order = new Order(OrderType.SELL, 100, "VALE3", 67.27, randomUserUUID, new Date(), account);
+
+        ProfitLoss profitLoss = new ProfitLoss(65.98D, 6598D, new Date(), account.getId(), order);
+        assertEquals(1.29, profitLoss.getAverage());
     }
 
 

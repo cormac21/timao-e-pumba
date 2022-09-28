@@ -1,6 +1,5 @@
 package com.cormacx.timaoepumba.entities.aggregate;
 
-import com.cormacx.timaoepumba.entities.account.HeldStock;
 import com.cormacx.timaoepumba.entities.order.Order;
 import lombok.Data;
 
@@ -10,6 +9,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToOne;
 import java.math.BigInteger;
+import java.util.Date;
 
 @Data
 @Entity
@@ -23,8 +23,13 @@ public class ProfitLoss {
 
     private double average;
 
-    @OneToOne
-    private HeldStock originatingStockSold;
+    private int amountSold;
+
+    private double stockAveragePrice;
+
+    private double stockTotalPrice;
+
+    private long accountId;
 
     @OneToOne
     private Order sellOrder;
@@ -33,14 +38,15 @@ public class ProfitLoss {
 
     private boolean isDayTrade;
 
-    public ProfitLoss(HeldStock originatingStock, Order sellOrder) {
-        this.originatingStockSold = originatingStock;
+    public ProfitLoss(Double stockAveragePrice, Double stockTotalPrice, Date lastAcquired, Long accountId, Order sellOrder) {
         this.sellOrder = sellOrder;
-        int quantity = originatingStock.getQuantity() - sellOrder.getQuantity();
-        Double boughtMatch = quantity * originatingStock.getAveragePrice();
-        this.totalValue = sellOrder.getTotalPrice() - boughtMatch;
-        this.average = totalValue / quantity;
-        this.differenceInTime = (originatingStock.getLastAcquired().getTime() - sellOrder.getCreatedOn().getTime());
+        this.amountSold = sellOrder.getQuantity();
+        this.stockAveragePrice = stockAveragePrice;
+        this.accountId = accountId;
+        this.stockTotalPrice = stockTotalPrice;
+        this.totalValue = sellOrder.getTotalPrice() - (stockAveragePrice * amountSold);
+        this.average = totalValue / amountSold;
+        this.differenceInTime = (lastAcquired.getTime() - sellOrder.getCreatedOn().getTime());
         if(differenceInTime <= 1000 * 60 * 60 * 24) {
             this.isDayTrade = true;
         }

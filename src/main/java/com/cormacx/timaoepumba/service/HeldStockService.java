@@ -1,7 +1,7 @@
 package com.cormacx.timaoepumba.service;
 
+import com.cormacx.timaoepumba.entities.account.Account;
 import com.cormacx.timaoepumba.entities.account.HeldStock;
-import com.cormacx.timaoepumba.entities.account.HeldStockStatus;
 import com.cormacx.timaoepumba.entities.order.Order;
 import com.cormacx.timaoepumba.entities.order.OrderType;
 import com.cormacx.timaoepumba.repositories.HeldStockRepository;
@@ -10,7 +10,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.text.DecimalFormat;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class HeldStockService {
@@ -19,12 +21,15 @@ public class HeldStockService {
 
     private final ProfitLossService profitLossService;
 
+    private final AccountService accountService;
+
     private static final DecimalFormat df = new DecimalFormat("0.00");
 
     @Autowired
-    public HeldStockService(HeldStockRepository heldStockRepository, ProfitLossService profitLossService) {
+    public HeldStockService(HeldStockRepository heldStockRepository, ProfitLossService profitLossService, AccountService accountService) {
         this.heldStockRepository = heldStockRepository;
         this.profitLossService = profitLossService;
+        this.accountService = accountService;
     }
 
     public HeldStock createOrUpdateHeldStock(Order savedOrder) {
@@ -38,25 +43,23 @@ public class HeldStockService {
                 if(savedOrder.getQuantity() > previouslyHeldStock.getQuantity()) {
                     throw new InvalidOrderException();
                 }
+                profitLossService.registerProfitLoss(previouslyHeldStock, savedOrder);
             }
             HeldStock resultingMerge = mergeHeldStock(savedOrder, previouslyHeldStock);
-            return save(resultingMerge);
+            if(resultingMerge.getQuantity() == 0) {
+                remove(resultingMerge);
+            } else {
+                return save(resultingMerge);
+            }
         } else {
             HeldStock noMergeStock = new HeldStock(
                     savedOrder.getQuantity(), savedOrder.getTicker(),
                     savedOrder.getTotalPrice(), savedOrder.getUnitPrice(),
-                    savedOrder.getCreatedOn(), savedOrder.getAccount(),
-                    HeldStockStatus.HELD
+                    savedOrder.getCreatedOn(), savedOrder.getAccount()
             );
             return save(noMergeStock);
         }
-    }
-
-    public void saveHeldStockAndCalculateProfitLoss(Order savedOrder) {
-        HeldStock heldStock = createOrUpdateHeldStock(savedOrder);
-        if(heldStock != null) {
-            profitLossService.registerProfitLoss(heldStock, savedOrder);
-        }
+        return null;
     }
 
     private HeldStock mergeHeldStock(Order savedOrder, HeldStock heldStock) {
@@ -68,13 +71,9 @@ public class HeldStockService {
             combinedTotalPrice = savedOrder.getTotalPrice() + heldStock.getTotalPrice();
             combinedAveragePrice = Double.parseDouble(df.format(combinedTotalPrice / combinedQuantity));
             heldStock.setLastAcquired(savedOrder.getCreatedOn());
-            heldStock.setStatus(HeldStockStatus.HELD);
         } else if (savedOrder.getType() == OrderType.SELL) {
             combinedQuantity = heldStock.getQuantity() - savedOrder.getQuantity();
             combinedAveragePrice = heldStock.getAveragePrice();
-            if (combinedQuantity == 0) {
-                heldStock.setStatus(HeldStockStatus.CLOSED);
-            }
             combinedTotalPrice = combinedAveragePrice * combinedQuantity;
         } else {
             return null;
@@ -107,6 +106,17 @@ public class HeldStockService {
         return heldStockRepository.save(heldStock);
     }
 
+    private void remove(HeldStock heldStock) {
+        heldStockRepository.delete(heldStock);
+    }
 
+    public List<HeldStock> getAllHeldStocksOnAccount(Long accountId) {
+        Optional<Account> accountOptional = accountService.findAccountById(accountId);
+        if ( accountOptional.isPresent() ) {
+            return heldStockRepository.findAllByAccount(accountOptional.get());
+        } else {
+            return Collections.emptyList();
+        }
+    }
 
 }

@@ -7,6 +7,8 @@ import com.cormacx.timaoepumba.repositories.ProfitLossRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class ProfitLossService {
 
@@ -19,7 +21,8 @@ public class ProfitLossService {
 
 
     public ProfitLoss registerProfitLoss(HeldStock accountHeldStock, Order order) {
-        ProfitLoss profitLoss = new ProfitLoss(accountHeldStock, order);
+        ProfitLoss profitLoss = new ProfitLoss(accountHeldStock.getAveragePrice(), accountHeldStock.getTotalPrice(),
+                accountHeldStock.getLastAcquired(), accountHeldStock.getAccount().getId(), order);
 
         return save(profitLoss);
     }
@@ -28,4 +31,7 @@ public class ProfitLossService {
         return profitLossRepository.save(profitLoss);
     }
 
+    public List<ProfitLoss> getAllAccountsProfitLosses(Long accountId) {
+        return profitLossRepository.findAllByAccountId(accountId);
+    }
 }
