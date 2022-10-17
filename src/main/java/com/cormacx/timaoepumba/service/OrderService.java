@@ -67,10 +67,14 @@ public class OrderService {
         if(accountOp.isEmpty()){
             return false;
         }
-        if(!isThereEnoughBalanceOnAccount(accountOp.get().getBalance(), op.getQuantity(), op.getUnitPrice())) {
+        if (op.getType().equalsIgnoreCase("c")) {
+            if(!isThereEnoughBalanceOnAccount(accountOp.get().getBalance(), op.getQuantity(), op.getUnitPrice())) {
+                return false;
+            }
+        } else if (!op.getType().equalsIgnoreCase("v")) {
             return false;
         }
-        return op.getType().equalsIgnoreCase("c") || op.getType().equalsIgnoreCase("v");
+        return true;
     }
 
     public boolean isThereEnoughBalanceOnAccount(Double balance, Integer quantity, Double unitPrice) {

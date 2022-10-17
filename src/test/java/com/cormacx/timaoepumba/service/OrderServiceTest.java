@@ -98,6 +98,28 @@ public class OrderServiceTest {
     }
 
     @Test
+    public void shouldBeValidOrderIfSellAmountIsGreaterThanAccountBalance() {
+        OrderDTO buyOrder = new OrderDTO();
+        buyOrder.setQuantity(1000);
+        buyOrder.setTicker("MGLU3");
+        buyOrder.setType("c");
+        buyOrder.setUserUUID("some-fake-user-uuid");
+        buyOrder.setUnitPrice(4.66D);
+        buyOrder.setCreatedOn(new Date());
+
+        Optional<Order> created = orderService.createNewOrder(buyOrder);
+        OrderDTO sellOrder = new OrderDTO();
+        sellOrder.setQuantity(1000);
+        sellOrder.setTicker("MGLU3");
+        sellOrder.setType("v");
+        sellOrder.setUserUUID("some-fake-user-uuid");
+        sellOrder.setUnitPrice(5.1D);
+        sellOrder.setCreatedOn(new Date());
+
+        assertTrue(orderService.isValidOrder(sellOrder));
+    }
+
+    @Test
     public void shouldSaveNewHeldStockToAccountWhenProcessingBuyOrder() {
         Optional<Order> created = orderService.createNewOrder(incomingOrder);
 

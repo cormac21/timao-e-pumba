@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.math.BigInteger;
 import java.util.List;
 import java.util.Optional;
@@ -32,7 +33,7 @@ public class OrderController {
     }
 
     @PostMapping
-    public Order createNewOrder(@RequestBody OrderDTO op) {
+    public Order createNewOrder(@RequestBody @Valid OrderDTO op) {
         Optional<Order> OrderOp = orderService.createNewOrder(op);
         return OrderOp.orElse(null);
     }
