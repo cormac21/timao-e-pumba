@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -22,6 +23,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import java.util.List;
 import java.util.Optional;
 
+@CrossOrigin(origins = "http://localhost:3000", allowCredentials = "true")
 @RestController
 @RequestMapping("api/v1/users")
 public class UserController {
@@ -30,13 +32,14 @@ public class UserController {
 
     private final AuthenticationManager authenticationManager;
 
+    @Autowired
     public UserController(UserService userService, AuthenticationManager authManager) {
         this.userService = userService;
         this.authenticationManager = authManager;
     }
 
     @PostMapping
-    public ResponseEntity<?> createNewUser(@RequestBody UserDTO user) {
+    public ResponseEntity<?> createNewUser(@RequestBody @Validated UserDTO user) {
         if (userService.findUserByEmail(user.getEmail()).isPresent()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
         }
