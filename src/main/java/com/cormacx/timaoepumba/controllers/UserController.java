@@ -23,7 +23,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import java.util.List;
 import java.util.Optional;
 
-@CrossOrigin(origins = "http://localhost:3000", allowCredentials = "true")
+@CrossOrigin(origins = "http://localhost:3000", allowCredentials = "true", exposedHeaders = "*")
 @RestController
 @RequestMapping("api/v1/users")
 public class UserController {
@@ -70,8 +70,7 @@ public class UserController {
             final var user = userService.findUserByEmail(userDTO.getEmail());
             String token = JWT.token(user.get());
             return ResponseEntity.ok()
-                    .header(HttpHeaders.AUTHORIZATION, token)
-                    .body(user.get());
+                    .header(HttpHeaders.AUTHORIZATION, token).build();
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
