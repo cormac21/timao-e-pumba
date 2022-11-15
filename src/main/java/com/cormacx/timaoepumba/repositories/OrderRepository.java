@@ -3,6 +3,7 @@ package com.cormacx.timaoepumba.repositories;
 import com.cormacx.timaoepumba.entities.account.OperationType;
 import com.cormacx.timaoepumba.entities.order.Order;
 import com.cormacx.timaoepumba.entities.order.OrderType;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
@@ -35,6 +36,8 @@ public interface OrderRepository extends PagingAndSortingRepository<Order, BigIn
     @Query("select o from Order o where o.userUUID = :userUUID and o.type = 1 and o.ticker = :ticker")
     @OrderBy("created_on desc")
     Order getLatestSellOrderFromUserAndTicker(@Param("userUUID") String userUUID, @Param("ticker") String ticker);
+
+    List<Order> findAllByUserUUID(String userUUID, Pageable pageable);
 
 
 }

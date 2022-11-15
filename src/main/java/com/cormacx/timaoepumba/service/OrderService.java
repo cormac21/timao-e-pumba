@@ -104,4 +104,9 @@ public class OrderService {
     public Order getLatestSellOrderFromUserForTicker(String userUUID, String ticker) {
         return orderRepository.findFirstByUserUUIDAndTickerAndTypeOrderByCreatedOnDesc(userUUID, ticker, OrderType.SELL);
     }
+
+    public List<Order> getAllOrdersFromUser(Integer pageNumber, Integer pageSize, String sortBy, String userUUID) {
+        Pageable paging = PageRequest.of(pageNumber, pageSize, Sort.by(sortBy).descending());
+        return orderRepository.findAllByUserUUID(userUUID, paging);
+    }
 }

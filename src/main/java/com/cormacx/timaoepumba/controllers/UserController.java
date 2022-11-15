@@ -70,7 +70,7 @@ public class UserController {
             final var user = userService.findUserByEmail(userDTO.getEmail());
             String token = JWT.token(user.get());
             return ResponseEntity.ok()
-                    .header(HttpHeaders.AUTHORIZATION, token).build();
+                    .header(HttpHeaders.AUTHORIZATION, token).body(user.get());
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }

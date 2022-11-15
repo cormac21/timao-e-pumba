@@ -14,6 +14,7 @@ import java.math.BigInteger;
 import java.util.List;
 import java.util.Optional;
 
+@CrossOrigin(origins = "http://localhost:3000")
 @RestController
 @RequestMapping("api/v1/orders")
 public class OrderController {
@@ -40,10 +41,15 @@ public class OrderController {
 
     @GetMapping
     public ResponseEntity<List<Order>> getAllOrders(@RequestParam(defaultValue = "0") Integer pageNumber,
-                                                        @RequestParam(defaultValue = "10") Integer pageSize,
-                                                        @RequestParam(defaultValue = "id") String sortBy) {
-        List<Order> orders = orderService.getAllOrders(pageNumber, pageSize, sortBy);
-
+                                                    @RequestParam(defaultValue = "10") Integer pageSize,
+                                                    @RequestParam(defaultValue = "id") String sortBy,
+                                                    @RequestParam(required = false) String userUUID) {
+        List<Order> orders;
+        if (userUUID != null) {
+            orders = orderService.getAllOrdersFromUser(pageNumber, pageSize, sortBy, userUUID);
+        } else {
+            orders = orderService.getAllOrders(pageNumber, pageSize, sortBy);
+        }
         return new ResponseEntity<>(orders, new HttpHeaders(), HttpStatus.OK);
     }
 
