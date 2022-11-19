@@ -5,7 +5,7 @@ import com.cormacx.timaoepumba.entities.account.HeldStock;
 import com.cormacx.timaoepumba.entities.order.Order;
 import com.cormacx.timaoepumba.entities.order.OrderType;
 import com.cormacx.timaoepumba.repositories.HeldStockRepository;
-import exceptions.InvalidOrderException;
+import com.cormacx.timaoepumba.exceptions.InvalidOrderException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

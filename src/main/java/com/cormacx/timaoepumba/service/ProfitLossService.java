@@ -21,11 +21,9 @@ public class ProfitLossService {
         this.profitLossRepository = profitLossRepository;
     }
 
-
     public ProfitLoss registerProfitLoss(HeldStock accountHeldStock, Order order) {
         ProfitLoss profitLoss = new ProfitLoss(accountHeldStock.getAveragePrice(), accountHeldStock.getTotalPrice(),
                 accountHeldStock.getLastAcquired(), accountHeldStock.getAccount().getId(), order);
-
         return save(profitLoss);
     }
 

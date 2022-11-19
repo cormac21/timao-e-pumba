@@ -6,7 +6,7 @@ import com.cormacx.timaoepumba.entities.aggregate.ProfitLoss;
 import com.cormacx.timaoepumba.entities.order.Order;
 import com.cormacx.timaoepumba.entities.order.OrderType;
 import com.cormacx.timaoepumba.repositories.HeldStockRepository;
-import exceptions.InvalidOrderException;
+import com.cormacx.timaoepumba.exceptions.InvalidOrderException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
