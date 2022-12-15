@@ -1,13 +1,12 @@
 package com.cormacx.timaoepumba.entities.order;
 
 import com.cormacx.timaoepumba.entities.account.Account;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
-import javax.validation.constraints.Min;
+import jakarta.validation.constraints.Min;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Date;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
@@ -36,7 +35,7 @@ public class OrderDTO {
         order.setUnitPrice(dto.getUnitPrice());
         order.setCreatedOn(dto.getCreatedOn());
         order.setAccount(account);
-        order.setTotalPrice(new BigDecimal(dto.getQuantity() * dto.getUnitPrice())
+        order.setTotalPrice(BigDecimal.valueOf(dto.getQuantity() * dto.getUnitPrice())
                 .setScale(2, RoundingMode.HALF_UP).doubleValue());
         return order;
     }

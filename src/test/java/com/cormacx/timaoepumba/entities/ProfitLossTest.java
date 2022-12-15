@@ -28,8 +28,11 @@ public class ProfitLossTest {
     @BeforeEach
     public void setup() {
         if(!setup) {
-            account = new Account(randomUserUUID, 78956.75D, true);
-
+            account = new Account();
+            account.setId(1L);
+            account.setUserUUID(randomUserUUID);
+            account.setActive(true);
+            account.setBalance(78956.75D);
         }
     }
 

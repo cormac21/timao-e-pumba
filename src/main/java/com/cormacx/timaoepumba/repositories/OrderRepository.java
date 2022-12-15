@@ -3,18 +3,19 @@ package com.cormacx.timaoepumba.repositories;
 import com.cormacx.timaoepumba.entities.account.OperationType;
 import com.cormacx.timaoepumba.entities.order.Order;
 import com.cormacx.timaoepumba.entities.order.OrderType;
+import jakarta.persistence.OrderBy;
+import java.math.BigInteger;
+import java.util.List;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.ListCrudRepository;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import javax.persistence.OrderBy;
-import java.math.BigInteger;
-import java.util.List;
-
 @Repository
-public interface OrderRepository extends PagingAndSortingRepository<Order, BigInteger> {
+public interface OrderRepository extends ListCrudRepository<Order, BigInteger>,
+        PagingAndSortingRepository<Order, BigInteger> {
 
     List<Order> findAll();
 
@@ -38,6 +39,5 @@ public interface OrderRepository extends PagingAndSortingRepository<Order, BigIn
     Order getLatestSellOrderFromUserAndTicker(@Param("userUUID") String userUUID, @Param("ticker") String ticker);
 
     List<Order> findAllByUserUUID(String userUUID, Pageable pageable);
-
 
 }

@@ -11,6 +11,10 @@ import com.cormacx.timaoepumba.repositories.RoleRepository;
 import com.cormacx.timaoepumba.service.AccountService;
 import com.cormacx.timaoepumba.service.OrderService;
 import com.cormacx.timaoepumba.service.UserService;
+import java.util.Optional;
+import java.util.Set;
+
+import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,10 +22,6 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
-
-import javax.transaction.Transactional;
-import java.util.Optional;
-import java.util.Set;
 
 @Component
 public class MigrationStation implements ApplicationListener<ContextRefreshedEvent> {

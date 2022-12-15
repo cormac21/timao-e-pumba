@@ -1,15 +1,14 @@
 package com.cormacx.timaoepumba.entities.aggregate;
 
 import com.cormacx.timaoepumba.entities.order.Order;
-import lombok.Data;
-
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.OneToOne;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToOne;
 import java.math.BigInteger;
 import java.util.Date;
+import lombok.Data;
 
 @Data
 @Entity
